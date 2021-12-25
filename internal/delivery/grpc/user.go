@@ -18,7 +18,7 @@
 package grpc
 
 import (
-	pb "github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
 	"github.com/Durudex/durudex-user-service/internal/service"
 )
 

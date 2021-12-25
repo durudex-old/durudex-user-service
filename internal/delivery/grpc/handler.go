@@ -23,7 +23,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	pb "github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
 	"github.com/Durudex/durudex-user-service/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
