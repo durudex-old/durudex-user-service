@@ -24,20 +24,23 @@ import (
 	"io/ioutil"
 
 	pb "github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-user-service/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-type Handler struct{}
+type Handler struct {
+	service *service.Service
+}
 
 // Creating a new grpc handler.
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(service *service.Service) *Handler {
+	return &Handler{service: service}
 }
 
 // Registration services handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	pb.RegisterUserServiceServer(srv, NewUserHandler())
+	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service))
 }
 
 // Loading TLS credentials.

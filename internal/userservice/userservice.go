@@ -24,7 +24,9 @@ import (
 
 	"github.com/Durudex/durudex-user-service/internal/config"
 	"github.com/Durudex/durudex-user-service/internal/delivery/grpc"
+	"github.com/Durudex/durudex-user-service/internal/repository"
 	"github.com/Durudex/durudex-user-service/internal/server"
+	"github.com/Durudex/durudex-user-service/internal/service"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,8 +38,10 @@ func Run(configPath string) {
 		log.Error().Msg(err.Error())
 	}
 
-	// Handlers.
-	grpcHandler := grpc.NewHandler()
+	// Repository, Service, Handler.
+	repos := repository.NewRepository()
+	service := service.NewService(repos)
+	grpcHandler := grpc.NewHandler(service)
 
 	// Create and run server.
 	srv := server.NewServer(cfg, grpcHandler)

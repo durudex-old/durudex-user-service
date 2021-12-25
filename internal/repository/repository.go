@@ -15,19 +15,15 @@
 	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package grpc
+package repository
 
-import (
-	pb "github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
-	"github.com/Durudex/durudex-user-service/internal/service"
-)
+type User interface{}
 
-type UserHandler struct {
-	service *service.Service
-	pb.UnimplementedUserServiceServer
+type Repository struct {
+	User
 }
 
-// Creating a new user handler.
-func NewUserHandler(service *service.Service) *UserHandler {
-	return &UserHandler{service: service}
+// Creating a new repository.
+func NewRepository() *Repository {
+	return &Repository{User: NewUserRepository()}
 }
