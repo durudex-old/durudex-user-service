@@ -15,8 +15,8 @@
 
 syntax = "proto3";
 
-package durudex.user;
+package types;
 
-option go_package = "github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf;pb";
+option go_package = "github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb/types;types";
 
-service UserService {}
+message ID { uint64 id = 1; }

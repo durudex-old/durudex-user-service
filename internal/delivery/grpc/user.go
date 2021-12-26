@@ -18,16 +18,16 @@
 package grpc
 
 import (
-	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb"
 	"github.com/Durudex/durudex-user-service/internal/service"
 )
 
 type UserHandler struct {
-	service *service.Service
+	service service.User
 	pb.UnimplementedUserServiceServer
 }
 
 // Creating a new user handler.
-func NewUserHandler(service *service.Service) *UserHandler {
+func NewUserHandler(service service.User) *UserHandler {
 	return &UserHandler{service: service}
 }

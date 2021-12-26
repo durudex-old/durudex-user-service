@@ -19,19 +19,11 @@ package service
 
 import "github.com/Durudex/durudex-user-service/internal/repository"
 
-type User interface{}
-
-type Post interface{}
-
-type Service struct {
-	User
-	Post
+type PostService struct {
+	repos repository.Post
 }
 
-// Creating a new service.
-func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		User: NewUserService(repos.User),
-		Post: NewPostService(repos.Post),
-	}
+// Creating a new post service.
+func NewPostService(repos repository.Post) *PostService {
+	return &PostService{repos: repos}
 }

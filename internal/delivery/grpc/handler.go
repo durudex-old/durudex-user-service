@@ -23,7 +23,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb"
 	"github.com/Durudex/durudex-user-service/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -40,7 +40,8 @@ func NewHandler(service *service.Service) *Handler {
 
 // Registration services handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service))
+	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service.User))
+	pb.RegisterPostServiceServer(srv, NewPostHandler(h.service.Post))
 }
 
 // Loading TLS credentials.

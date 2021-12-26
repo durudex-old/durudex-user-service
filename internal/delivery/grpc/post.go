@@ -15,23 +15,19 @@
 	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package service
+package grpc
 
-import "github.com/Durudex/durudex-user-service/internal/repository"
+import (
+	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb"
+	"github.com/Durudex/durudex-user-service/internal/service"
+)
 
-type User interface{}
-
-type Post interface{}
-
-type Service struct {
-	User
-	Post
+type PostHandler struct {
+	service service.Post
+	pb.UnimplementedPostServiceServer
 }
 
-// Creating a new service.
-func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		User: NewUserService(repos.User),
-		Post: NewPostService(repos.Post),
-	}
+// Creating a new post handler.
+func NewPostHandler(service service.Post) *PostHandler {
+	return &PostHandler{service: service}
 }

@@ -15,23 +15,11 @@
 	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package service
+package repository
 
-import "github.com/Durudex/durudex-user-service/internal/repository"
+type PostRepository struct{}
 
-type User interface{}
-
-type Post interface{}
-
-type Service struct {
-	User
-	Post
-}
-
-// Creating a new service.
-func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		User: NewUserService(repos.User),
-		Post: NewPostService(repos.Post),
-	}
+// Creating a new post repository.
+func NewPostRepository() *PostRepository {
+	return &PostRepository{}
 }

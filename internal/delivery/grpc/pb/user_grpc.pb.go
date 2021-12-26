@@ -57,5 +57,5 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams:     []grpc.StreamDesc{},
-	Metadata:    "internal/delivery/grpc/protobuf/user.proto",
+	Metadata:    "internal/delivery/grpc/pb/user.proto",
 }

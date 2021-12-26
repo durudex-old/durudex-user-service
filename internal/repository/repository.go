@@ -19,11 +19,17 @@ package repository
 
 type User interface{}
 
+type Post interface{}
+
 type Repository struct {
 	User
+	Post
 }
 
 // Creating a new repository.
 func NewRepository() *Repository {
-	return &Repository{User: NewUserRepository()}
+	return &Repository{
+		User: NewUserRepository(),
+		Post: NewPostRepository(),
+	}
 }
