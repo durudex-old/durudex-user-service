@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -18,15 +18,10 @@
 package grpc
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"errors"
-	"io/ioutil"
+	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-user-service/internal/service"
 
-	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb"
-	"github.com/Durudex/durudex-user-service/internal/service"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 type Handler struct {
@@ -41,34 +36,4 @@ func NewHandler(service *service.Service) *Handler {
 // Registration services handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
 	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service.User))
-	pb.RegisterPostServiceServer(srv, NewPostHandler(h.service.Post))
-}
-
-// Loading TLS credentials.
-func LoadTLSCredentials(caCertPath, certPath, keyPath string) (credentials.TransportCredentials, error) {
-	// Load certificate on the CA who signed client's certificate.
-	pemCA, err := ioutil.ReadFile(caCertPath)
-	if err != nil {
-		return nil, err
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(pemCA) {
-		return nil, errors.New("error to add server CA's certificate")
-	}
-
-	// Load server's certificate and private key.
-	serverCert, err := tls.LoadX509KeyPair(certPath, keyPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create the credentials and returning it.
-	config := &tls.Config{
-		Certificates: []tls.Certificate{serverCert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    certPool,
-	}
-
-	return credentials.NewTLS(config), nil
 }

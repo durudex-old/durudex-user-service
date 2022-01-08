@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -19,17 +19,11 @@ package repository
 
 type User interface{}
 
-type Post interface{}
-
 type Repository struct {
 	User
-	Post
 }
 
 // Creating a new repository.
 func NewRepository() *Repository {
-	return &Repository{
-		User: NewUserRepository(),
-		Post: NewPostRepository(),
-	}
+	return &Repository{User: NewUserRepository()}
 }

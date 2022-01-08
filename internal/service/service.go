@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -17,21 +17,15 @@
 
 package service
 
-import "github.com/Durudex/durudex-user-service/internal/repository"
+import "github.com/durudex/durudex-user-service/internal/repository"
 
 type User interface{}
 
-type Post interface{}
-
 type Service struct {
 	User
-	Post
 }
 
 // Creating a new service.
 func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		User: NewUserService(repos.User),
-		Post: NewPostService(repos.Post),
-	}
+	return &Service{User: NewUserService(repos.User)}
 }

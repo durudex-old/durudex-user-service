@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 package grpc
 
 import (
-	"github.com/Durudex/durudex-user-service/internal/delivery/grpc/pb"
-	"github.com/Durudex/durudex-user-service/internal/service"
+	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-user-service/internal/service"
 )
 
 type UserHandler struct {

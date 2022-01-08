@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -22,11 +22,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Durudex/durudex-user-service/internal/config"
-	"github.com/Durudex/durudex-user-service/internal/delivery/grpc"
-	"github.com/Durudex/durudex-user-service/internal/repository"
-	"github.com/Durudex/durudex-user-service/internal/server"
-	"github.com/Durudex/durudex-user-service/internal/service"
+	"github.com/durudex/durudex-user-service/internal/config"
+	"github.com/durudex/durudex-user-service/internal/delivery/grpc"
+	"github.com/durudex/durudex-user-service/internal/repository"
+	"github.com/durudex/durudex-user-service/internal/server"
+	"github.com/durudex/durudex-user-service/internal/service"
+
 	"github.com/rs/zerolog/log"
 )
 

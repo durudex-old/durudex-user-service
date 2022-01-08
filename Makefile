@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,10 @@ lint:
 .PHONY: test
 test: lint
 	go test -v ./...
+
+.PHONY: migrate-create
+migrate-create:
+	migrate create -ext sql -dir ./schema -seq durudex
 
 .PHONY: protoc
 protoc:

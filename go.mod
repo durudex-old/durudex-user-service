@@ -1,4 +1,4 @@
-module github.com/Durudex/durudex-user-service
+module github.com/durudex/durudex-user-service
 
 go 1.17
 
