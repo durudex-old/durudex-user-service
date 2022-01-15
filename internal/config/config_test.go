@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -38,10 +38,10 @@ func TestInit(t *testing.T) {
 			name: "test config",
 			args: args{path: "fixtures/main"},
 			wand: &Config{
-				GRPC: GRPCConfig{
-					Host: "userservice.durudex.local",
-					Port: "8004",
-					TLS:  true,
+				Server: ServerConfig{
+					Host: defaultServerHost,
+					Port: defaultServerPort,
+					TLS:  defaultServerTLS,
 				},
 			},
 		},

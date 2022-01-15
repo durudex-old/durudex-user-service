@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,11 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package repository
+package config
 
-// User repository structure.
-type UserRepository struct{}
-
-// Creating a new user repository.
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
-}
+const (
+	// Server defaults.
+	defaultServerHost = "userservice.durudex.local"
+	defaultServerPort = "8004"
+	defaultServerTLS  = true
+)

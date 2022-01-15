@@ -19,11 +19,11 @@ package service
 
 import "github.com/durudex/durudex-user-service/internal/repository"
 
+// User service interface.
 type User interface{}
 
-type Service struct {
-	User
-}
+// Service structure.
+type Service struct{ User }
 
 // Creating a new service.
 func NewService(repos *repository.Repository) *Service {

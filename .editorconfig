@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
+end_of_line = lf
 
 [{Makefile,go.mod,go.sum,*.go}]
 indent_style = tab
@@ -37,4 +38,3 @@ indent_size = 4
 
 [*.html]
 indent_size = 2
-end_of_line = lf

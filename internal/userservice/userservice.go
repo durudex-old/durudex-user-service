@@ -31,12 +31,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Run durudex user service application.
+// A function that running the application.
 func Run(configPath string) {
 	// Initialize config.
 	cfg, err := config.Init(configPath)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("error initialize config: %s", err.Error())
 	}
 
 	// Repository, Service, Handler.
@@ -44,9 +44,13 @@ func Run(configPath string) {
 	service := service.NewService(repos)
 	grpcHandler := grpc.NewHandler(service)
 
-	// Create and run server.
-	srv := server.NewServer(cfg, grpcHandler)
+	// Create a new server.
+	srv, err := server.NewServer(cfg, grpcHandler)
+	if err != nil {
+		log.Fatal().Msgf("error creating a new server: %s", err.Error())
+	}
 
+	// Run server.
 	go srv.Run()
 
 	// Quit in application.

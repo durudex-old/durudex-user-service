@@ -19,6 +19,7 @@ package service
 
 import "github.com/durudex/durudex-user-service/internal/repository"
 
+// User service structure.
 type UserService struct {
 	repos repository.User
 }
