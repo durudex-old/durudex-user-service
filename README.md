@@ -22,10 +22,17 @@ Service for working with users.
 ### 💡 Prerequisites
 + [Go 1.17](https://golang.org/)
 + [grpc](https://grpc.io/docs/languages/go/quickstart/)
++ [migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
 + [golangci-lint](https://golangci-lint.run/usage/install/)
 
 ## ⚙️ Build & Run
-1) Generate certificates, information can be found at [cert/README.md](cert/README.md)
+1) Add variables from `.env.example` to your environment variables:
+```env
+# Postgres database variables:
+POSTGRES_URL=
+```
+2) Generate certificates, information can be found at [certs/README.md](certs/README.md)
+3) Migrate the database using `make migrate-up`.
 
 Use `make run` to run and `make build` to build project.
 
@@ -38,10 +45,11 @@ If you want to say thank you and/or support the active development of [Durudex](
 2) Join the [Discord Server](https://discord.gg/4qcXbeVehZ).
 
 ## ⚠️ License
-Copyright © 2021 [Durudex](https://github.com/durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
+Copyright © 2021-2022 [Durudex](https://github.com/durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
 
 #### Third-party library licenses
 + [grpc-go](https://github.com/grpc/grpc-go/blob/master/LICENSE)
 + [protobuf](https://github.com/protocolbuffers/protobuf/blob/master/LICENSE)
 + [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
 + [viper](https://github.com/spf13/viper/blob/master/LICENSE)
++ [pgx](https://github.com/jackc/pgx/blob/master/LICENSE)

@@ -15,17 +15,14 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package repository
+package psql
 
 import "github.com/durudex/durudex-user-service/pkg/database/postgres"
 
-// User repository interface.
-type User interface{}
+// User postgres repository structure.
+type UserRepository struct{ psql postgres.Pool }
 
-// Repository structure.
-type Repository struct{ User }
-
-// Creating a new repository.
-func NewRepository(psql postgres.Pool) *Repository {
-	return &Repository{User: NewUserRepository(psql)}
+// Creating a new user postgres repository.
+func NewUserRepository(psql postgres.Pool) *UserRepository {
+	return &UserRepository{psql: psql}
 }

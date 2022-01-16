@@ -17,10 +17,15 @@
 
 package repository
 
+import (
+	"github.com/durudex/durudex-user-service/internal/repository/psql"
+	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+)
+
 // User repository structure.
-type UserRepository struct{}
+type UserRepository struct{ psql *psql.UserRepository }
 
 // Creating a new user repository.
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
+func NewUserRepository(conn postgres.Pool) *UserRepository {
+	return &UserRepository{psql: psql.NewUserRepository(conn)}
 }

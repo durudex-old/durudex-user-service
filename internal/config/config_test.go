@@ -18,14 +18,26 @@
 package config
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
 
 // Test initialize config.
 func TestInit(t *testing.T) {
+	// Environment configurations.
+	type env struct{ postgresURL string }
+
 	// Testing args.
-	type args struct{ path string }
+	type args struct {
+		path string
+		env  env
+	}
+
+	// Set environments configurations.
+	setEnv := func(env env) {
+		os.Setenv("POSTGRES_URL", env.postgresURL)
+	}
 
 	// Tests structures.
 	tests := []struct {
@@ -36,13 +48,17 @@ func TestInit(t *testing.T) {
 	}{
 		{
 			name: "test config",
-			args: args{path: "fixtures/main"},
+			args: args{
+				path: "fixtures/main",
+				env:  env{postgresURL: "postgres://localhost:1"},
+			},
 			wand: &Config{
 				Server: ServerConfig{
 					Host: defaultServerHost,
 					Port: defaultServerPort,
 					TLS:  defaultServerTLS,
 				},
+				Postgres: PostgresConfig{URL: "postgres://localhost:1"},
 			},
 		},
 	}
@@ -50,6 +66,9 @@ func TestInit(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Set environments configurations.
+			setEnv(tt.args.env)
+
 			// Initialize connfig.
 			got, err := Init(tt.args.path)
 			if (err != nil) != tt.wantErr {

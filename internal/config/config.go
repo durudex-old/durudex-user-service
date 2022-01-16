@@ -18,6 +18,7 @@
 package config
 
 import (
+	"os"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -26,7 +27,10 @@ import (
 
 type (
 	// Config variables.
-	Config struct{ Server ServerConfig }
+	Config struct {
+		Server   ServerConfig   // Server config.
+		Postgres PostgresConfig // Postgres config.
+	}
 
 	// Server config variables.
 	ServerConfig struct {
@@ -34,6 +38,9 @@ type (
 		Port string `mapstructure:"port"`
 		TLS  bool   `mapstructure:"tls"`
 	}
+
+	// Postgres config variables.
+	PostgresConfig struct{ URL string }
 )
 
 // Initialize config.
@@ -54,6 +61,9 @@ func Init(configPath string) (*Config, error) {
 	if err := unmarshal(&cfg); err != nil {
 		return nil, err
 	}
+
+	// Set configurations from environment.
+	setFromEnv(&cfg)
 
 	return &cfg, nil
 }
@@ -78,6 +88,14 @@ func unmarshal(cfg *Config) error {
 
 	// Unmarshal server keys.
 	return viper.UnmarshalKey("server", &cfg.Server)
+}
+
+// Set configurations from environment.
+func setFromEnv(cfg *Config) {
+	log.Debug().Msg("Set configurations from environment.")
+
+	// Postgres configurations.
+	cfg.Postgres.URL = os.Getenv("POSTGRES_URL")
 }
 
 // Populate defaults config variables.
