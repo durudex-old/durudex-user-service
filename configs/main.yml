@@ -17,3 +17,7 @@ server:
   host: userservice.durudex.local
   port: 8004
   tls: true
+
+hash:
+  password:
+    cost: 14

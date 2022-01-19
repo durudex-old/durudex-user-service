@@ -19,19 +19,9 @@ CREATE TABLE IF NOT EXISTS "user" (
   "id"         BIGSERIAL    NOT NULL UNIQUE,
   "username"   VARCHAR(40)  NOT NULL UNIQUE,
   "email"      VARCHAR(255) NOT NULL UNIQUE,
-  "phone"      VARCHAR(15)           UNIQUE,
   "password"   VARCHAR(100) NOT NULL,
-  "joined_in"  TIMESTAMP    NOT NULL,
-  "last_join"  TIMESTAMP,
-  "avatar_url" VARCHAR(255),
-  "verified"   BOOLEAN      NOT NULL DEFAULT false
-);
-
-CREATE TABLE IF NOT EXISTS "user_profile" (
-  "id"       BIGSERIAL                                        NOT NULL UNIQUE,
-  "user_id"  BIGINT REFERENCES "user"("id") ON DELETE CASCADE NOT NULL UNIQUE,
-  "name"     VARCHAR(60),
-  "sex"      SMALLINT                                         NOT NULL CHECK ("sex" IN (0, 1, 2, 9)),
-  "status"   VARCHAR(100),
-  "birthday" DATE                                             NULL NULL
+  "joined_in"  TIMESTAMP    NOT NULL DEFAULT now(),
+  "last_visit" TIMESTAMP    NOT NULL DEFAULT now(),
+  "verified"   BOOLEAN      NOT NULL DEFAULT false,
+  "avatar_url" VARCHAR(255)
 );

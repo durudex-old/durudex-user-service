@@ -17,15 +17,23 @@
 
 package service
 
-import "github.com/durudex/durudex-user-service/internal/repository"
+import (
+	"context"
+
+	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/internal/repository"
+	"github.com/durudex/durudex-user-service/pkg/hash"
+)
 
 // User service interface.
-type User interface{}
+type User interface {
+	Create(ctx context.Context, user domain.User) (uint64, error)
+}
 
 // Service structure.
 type Service struct{ User }
 
 // Creating a new service.
-func NewService(repos *repository.Repository) *Service {
-	return &Service{User: NewUserService(repos.User)}
+func NewService(repos *repository.Repository, hash *hash.Hash) *Service {
+	return &Service{User: NewUserService(repos.User, hash.Password)}
 }

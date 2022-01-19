@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Durudex
+ * Copyright © 2021-2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,18 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+package hash
 
-const (
-	// Server defaults.
-	defaultServerHost = "userservice.durudex.local"
-	defaultServerPort = "8004"
-	defaultServerTLS  = true
+// Password hash interface.
+type Password interface {
+	Hash(password string) (string, error)
+	Check(hash, password string) bool
+}
 
-	// Password defaults.
-	defaultPasswordCost = 14
-)
+// Hash manager structure.
+type Hash struct{ Password }
+
+// Creating a new hash manager.
+func NewHash(cost int) *Hash {
+	return &Hash{Password: NewPassword(cost)}
+}

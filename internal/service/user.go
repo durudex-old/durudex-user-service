@@ -17,14 +17,44 @@
 
 package service
 
-import "github.com/durudex/durudex-user-service/internal/repository"
+import (
+	"context"
+
+	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/internal/repository"
+	"github.com/durudex/durudex-user-service/pkg/hash"
+)
 
 // User service structure.
 type UserService struct {
 	repos repository.User
+	hash  hash.Password
 }
 
 // Creating a new user service.
-func NewUserService(repos repository.User) *UserService {
-	return &UserService{repos: repos}
+func NewUserService(repos repository.User, hash hash.Password) *UserService {
+	return &UserService{repos: repos, hash: hash}
+}
+
+// Creating a new user.
+func (s *UserService) Create(ctx context.Context, user domain.User) (uint64, error) {
+	// Validate user.
+	if err := user.Validate(); err != nil {
+		return 0, err
+	}
+
+	// Hasing user password.
+	hashPassword, err := s.hash.Hash(user.Password)
+	if err != nil {
+		return 0, err
+	}
+	user.Password = hashPassword
+
+	// Creating a new user in postgres datatabe.
+	id, err := s.repos.Create(ctx, user)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

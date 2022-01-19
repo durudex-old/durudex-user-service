@@ -17,7 +17,17 @@
 
 package psql
 
-import "github.com/durudex/durudex-user-service/pkg/database/postgres"
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+)
+
+// User database tables.
+const userTable = "user"
 
 // User postgres repository structure.
 type UserRepository struct{ psql postgres.Pool }
@@ -25,4 +35,20 @@ type UserRepository struct{ psql postgres.Pool }
 // Creating a new user postgres repository.
 func NewUserRepository(psql postgres.Pool) *UserRepository {
 	return &UserRepository{psql: psql}
+}
+
+// Creating a new user in postgres datatabe.
+func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
+	var id uint64
+
+	// Query to create user.
+	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3) RETURNING "id"`, userTable)
+
+	// Query and get id.
+	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
+	if err := row.Scan(&id); err != nil {
+		return 0, errors.New("error creating a new user")
+	}
+
+	return id, nil
 }

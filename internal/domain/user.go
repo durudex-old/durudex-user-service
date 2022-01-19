@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Durudex
+ * Copyright © 2021-2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,24 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+package domain
 
-const (
-	// Server defaults.
-	defaultServerHost = "userservice.durudex.local"
-	defaultServerPort = "8004"
-	defaultServerTLS  = true
+import "time"
 
-	// Password defaults.
-	defaultPasswordCost = 14
-)
+// User model.
+type User struct {
+	ID        uint64
+	Username  string
+	Email     string
+	Password  string
+	JoinedIn  time.Time
+	LastJoin  time.Time
+	Verified  bool
+	AvatarURL *string
+}
+
+// Validate user.
+func (u *User) Validate() error {
+	// TODO.
+	return nil
+}

@@ -30,6 +30,7 @@ type (
 	Config struct {
 		Server   ServerConfig   // Server config.
 		Postgres PostgresConfig // Postgres config.
+		Hash     HashConfig     // Hash config.
 	}
 
 	// Server config variables.
@@ -37,6 +38,14 @@ type (
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
 		TLS  bool   `mapstructure:"tls"`
+	}
+
+	// Hash config variables.
+	HashConfig struct{ Password PasswordConfig }
+
+	// Password config variables.
+	PasswordConfig struct {
+		Cost int `mapstructure:"cost"`
 	}
 
 	// Postgres config variables.
@@ -86,6 +95,10 @@ func parseConfigFile(configPath string) error {
 func unmarshal(cfg *Config) error {
 	log.Debug().Msg("Unmarshal config keys...")
 
+	// Unmarshal password keys.
+	if err := viper.UnmarshalKey("hash.password", &cfg.Hash.Password); err != nil {
+		return err
+	}
 	// Unmarshal server keys.
 	return viper.UnmarshalKey("server", &cfg.Server)
 }
@@ -106,4 +119,7 @@ func populateDefaults() {
 	viper.SetDefault("server.host", defaultServerHost)
 	viper.SetDefault("server.port", defaultServerPort)
 	viper.SetDefault("server.tls", defaultServerTLS)
+
+	// Password defaults.
+	viper.SetDefault("hash.password.cost", defaultPasswordCost)
 }

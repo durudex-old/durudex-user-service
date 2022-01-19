@@ -36,5 +36,5 @@ func NewHandler(service *service.Service) *Handler {
 
 // Registration services handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service.User))
+	pb.RegisterUserServiceServer(srv, NewUserHandler(h.service))
 }

@@ -53,3 +53,4 @@ Copyright © 2021-2022 [Durudex](https://github.com/durudex). Released under the
 + [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
 + [viper](https://github.com/spf13/viper/blob/master/LICENSE)
 + [pgx](https://github.com/jackc/pgx/blob/master/LICENSE)
++ [crypto](https://github.com/golang/crypto/blob/master/LICENSE)

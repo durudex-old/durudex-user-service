@@ -15,19 +15,9 @@
 
 syntax = "proto3";
 
-package durudex.user;
+package types;
 
-option go_package = "github.com/durudex/durudex-user-service/internal/delivery/grpc/pb;pb";
+option go_package = "github.com/durudex/durudex-user-service/internal/delivery/grpc/pb/types;types";
 
-import "internal/delivery/grpc/pb/types/id.proto";
-
-service UserService {
-  rpc Create (CreateRequest) returns (types.ID);
-}
-
-// Create user request message.
-message CreateRequest {
-  string username = 1;
-  string email = 2;
-  string password = 3;
-}
+// ID type.
+message ID { uint64 id = 1; }

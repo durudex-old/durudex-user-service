@@ -18,6 +18,9 @@
 package repository
 
 import (
+	"context"
+
+	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/psql"
 	"github.com/durudex/durudex-user-service/pkg/database/postgres"
 )
@@ -28,4 +31,9 @@ type UserRepository struct{ psql *psql.UserRepository }
 // Creating a new user repository.
 func NewUserRepository(conn postgres.Pool) *UserRepository {
 	return &UserRepository{psql: psql.NewUserRepository(conn)}
+}
+
+// Creating a new user in postgres datatabe.
+func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
+	return r.psql.Create(ctx, user)
 }

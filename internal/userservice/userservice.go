@@ -28,6 +28,7 @@ import (
 	"github.com/durudex/durudex-user-service/internal/server"
 	"github.com/durudex/durudex-user-service/internal/service"
 	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+	"github.com/durudex/durudex-user-service/pkg/hash"
 
 	"github.com/rs/zerolog/log"
 )
@@ -46,9 +47,12 @@ func Run(configPath string) {
 		log.Error().Msgf("error connection to postgres database: %s", err.Error())
 	}
 
+	// Managers.
+	hashManager := hash.NewHash(cfg.Hash.Password.Cost)
+
 	// Repository, Service, Handler.
 	repos := repository.NewRepository(psql)
-	service := service.NewService(repos)
+	service := service.NewService(repos, hashManager)
 	grpcHandler := grpc.NewHandler(service)
 
 	// Create a new server.

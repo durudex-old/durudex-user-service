@@ -18,8 +18,15 @@
 package grpc
 
 import (
+	"context"
+
 	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb/types"
+	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/service"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // User handler structure.
@@ -31,4 +38,22 @@ type UserHandler struct {
 // Creating a new gRPC user handler.
 func NewUserHandler(service service.User) *UserHandler {
 	return &UserHandler{service: service}
+}
+
+// Create user handler.
+func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*types.ID, error) {
+	// Create user model
+	user := domain.User{
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	// Creating a new user.
+	id, err := h.service.Create(ctx, user)
+	if err != nil {
+		return &types.ID{Id: 0}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.ID{Id: id}, nil
 }

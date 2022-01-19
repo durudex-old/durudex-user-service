@@ -17,10 +17,17 @@
 
 package repository
 
-import "github.com/durudex/durudex-user-service/pkg/database/postgres"
+import (
+	"context"
+
+	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+)
 
 // User repository interface.
-type User interface{}
+type User interface {
+	Create(ctx context.Context, user domain.User) (uint64, error)
+}
 
 // Repository structure.
 type Repository struct{ User }
