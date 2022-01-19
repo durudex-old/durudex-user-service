@@ -59,6 +59,7 @@ func TestInit(t *testing.T) {
 					TLS:  defaultServerTLS,
 				},
 				Postgres: PostgresConfig{URL: "postgres://localhost:1"},
+				Hash:     HashConfig{Password: PasswordConfig{Cost: defaultPasswordCost}},
 			},
 		},
 	}
