@@ -17,7 +17,10 @@
 
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 // User model.
 type User struct {
@@ -33,6 +36,14 @@ type User struct {
 
 // Validate user.
 func (u *User) Validate() error {
-	// TODO.
+	switch {
+	case !rxUsername.MatchString(u.Username):
+		return errors.New("error username is incorrect")
+	case !rxPassword.MatchString(u.Password):
+		return errors.New("error password is incorrect")
+	case !rxEmail.MatchString(u.Email):
+		return errors.New("error email is incorrect")
+	}
+
 	return nil
 }

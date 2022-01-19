@@ -20,8 +20,8 @@ package hash
 import "testing"
 
 const (
-	password = "1234567890"
-	cost     = 14
+	password string = "1234567890"
+	cost     int    = 14
 )
 
 // Testing generating a new password hash.

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Durudex
+ * Copyright © 2021-2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,21 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+package domain
 
-const (
-	// Server defaults.
-	defaultServerHost string = "userservice.durudex.local"
-	defaultServerPort string = "8004"
-	defaultServerTLS  bool   = true
+import "testing"
 
-	// Password defaults.
-	defaultPasswordCost int = 14
-)
+// Testing calidate user.
+func TestValidate(t *testing.T) {
+	// Creating user model.
+	user := User{
+		Username: "Example",
+		Password: "Qwerty123!",
+		Email:    "example@example.com",
+	}
+
+	// Validate user.
+	if err := user.Validate(); err != nil {
+		t.Errorf("error validating user: %s", err.Error())
+	}
+}
