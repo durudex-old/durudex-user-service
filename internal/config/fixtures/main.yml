@@ -24,5 +24,5 @@ hash:
 
 database:
   postgres:
-    maxConns: 20
-    minConns: 5
+    max-conns: 20
+    min-conns: 5
