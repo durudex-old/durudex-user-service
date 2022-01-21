@@ -14,10 +14,15 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>
 
 grpc:
-  host: userservice.durudex.local
+  host: user-service.durudex.local
   port: 8004
   tls: true
 
 hash:
   password:
     cost: 14
+
+database:
+  postgres:
+    maxConns: 20
+    minConns: 5

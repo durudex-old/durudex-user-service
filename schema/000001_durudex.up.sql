@@ -25,3 +25,12 @@ CREATE TABLE IF NOT EXISTS "user" (
   "verified"   BOOLEAN      NOT NULL DEFAULT false,
   "avatar_url" VARCHAR(255)
 );
+
+CREATE TABLE IF NOT EXISTS "user_profile" (
+  "user_id"  BIGINT REFERENCES "user"("id") ON DELETE CASCADE NOT NULL UNIQUE,
+  "name"     VARCHAR(60),
+  "sex"      SMALLINT                                         CHECK ("sex" IN (0, 1, 2, 9)),
+  "status"   VARCHAR(100),
+  "location" POINT,
+  "birthday" DATE
+);

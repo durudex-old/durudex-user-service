@@ -15,7 +15,7 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package userservice
+package app
 
 import (
 	"os"
@@ -41,8 +41,14 @@ func Run(configPath string) {
 		log.Error().Msgf("error initialize config: %s", err.Error())
 	}
 
+	log.Debug().Msg("Creating connections to postgress database...")
+
 	// Creating a new postgres connections.
-	psql, err := postgres.NewPostgresPool(postgres.PostgresConfig{URL: ""})
+	psql, err := postgres.NewPostgresPool(postgres.PostgresConfig{
+		MaxConns: cfg.Database.Postgres.MaxConns,
+		MinConns: cfg.Database.Postgres.MinConns,
+		URL:      cfg.Database.Postgres.URL,
+	})
 	if err != nil {
 		log.Error().Msgf("error connection to postgres database: %s", err.Error())
 	}

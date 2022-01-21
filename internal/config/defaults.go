@@ -25,4 +25,8 @@ const (
 
 	// Password defaults.
 	defaultPasswordCost int = 14
+
+	// Postgres defaults.
+	defaultPostgresMaxConns int32 = 20
+	defaultPostgresMinConns int32 = 5
 )

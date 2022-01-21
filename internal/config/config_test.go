@@ -43,7 +43,7 @@ func TestInit(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wand    *Config
+		want    *Config
 		wantErr bool
 	}{
 		{
@@ -52,14 +52,20 @@ func TestInit(t *testing.T) {
 				path: "fixtures/main",
 				env:  env{postgresURL: "postgres://localhost:1"},
 			},
-			wand: &Config{
+			want: &Config{
 				Server: ServerConfig{
 					Host: defaultServerHost,
 					Port: defaultServerPort,
 					TLS:  defaultServerTLS,
 				},
-				Postgres: PostgresConfig{URL: "postgres://localhost:1"},
-				Hash:     HashConfig{Password: PasswordConfig{Cost: defaultPasswordCost}},
+				Database: DatabaseConfig{
+					Postgres: PostgresConfig{
+						MaxConns: defaultPostgresMaxConns,
+						MinConns: defaultPostgresMinConns,
+						URL:      "postgres://localhost:1",
+					},
+				},
+				Hash: HashConfig{Password: PasswordConfig{Cost: defaultPasswordCost}},
 			},
 		},
 	}
@@ -77,7 +83,7 @@ func TestInit(t *testing.T) {
 			}
 
 			// Check for similarity of a config.
-			if !reflect.DeepEqual(got, tt.wand) {
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("error config are not similar: %s", err.Error())
 			}
 		})

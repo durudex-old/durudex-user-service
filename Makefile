@@ -19,11 +19,11 @@ download:
 
 .PHONY: build
 build: download
-	go build -o .bin/userservice.exe ./cmd/userservice/main.go
+	go build -o .bin/user-service.exe ./cmd/app/main.go
 
 .PHONY: run
 run: download
-	go run ./cmd/userservice/main.go
+	go run ./cmd/app/main.go
 
 .PHONY: lint
 lint:

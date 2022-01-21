@@ -29,7 +29,7 @@ type (
 	// Config variables.
 	Config struct {
 		Server   ServerConfig   // Server config.
-		Postgres PostgresConfig // Postgres config.
+		Database DatabaseConfig // Database config.
 		Hash     HashConfig     // Hash config.
 	}
 
@@ -48,8 +48,15 @@ type (
 		Cost int `mapstructure:"cost"`
 	}
 
+	// Database config variables.
+	DatabaseConfig struct{ Postgres PostgresConfig }
+
 	// Postgres config variables.
-	PostgresConfig struct{ URL string }
+	PostgresConfig struct {
+		MaxConns int32 `mapstructure:"max-conns"`
+		MinConns int32 `mapstructure:"min-conns"`
+		URL      string
+	}
 )
 
 // Initialize config.
@@ -99,6 +106,10 @@ func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("hash.password", &cfg.Hash.Password); err != nil {
 		return err
 	}
+	// Unmarshal postgres database keys.
+	if err := viper.UnmarshalKey("database.postgres", &cfg.Database.Postgres); err != nil {
+		return err
+	}
 	// Unmarshal server keys.
 	return viper.UnmarshalKey("server", &cfg.Server)
 }
@@ -108,7 +119,7 @@ func setFromEnv(cfg *Config) {
 	log.Debug().Msg("Set configurations from environment.")
 
 	// Postgres configurations.
-	cfg.Postgres.URL = os.Getenv("POSTGRES_URL")
+	cfg.Database.Postgres.URL = os.Getenv("POSTGRES_URL")
 }
 
 // Populate defaults config variables.
@@ -122,4 +133,8 @@ func populateDefaults() {
 
 	// Password defaults.
 	viper.SetDefault("hash.password.cost", defaultPasswordCost)
+
+	// Postgres defaults.
+	viper.SetDefault("database.postgres.maxConn", defaultPostgresMaxConns)
+	viper.SetDefault("database.postgres.minConn", defaultPostgresMinConns)
 }

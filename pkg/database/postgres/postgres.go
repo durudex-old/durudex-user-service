@@ -20,9 +20,12 @@ package postgres
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/log/zerologadapter"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/rs/zerolog"
 )
 
 // Postgres pool connections interface.
@@ -32,12 +35,29 @@ type Pool interface {
 }
 
 // Postgres config.
-type PostgresConfig struct {URL string}
+type PostgresConfig struct {
+	MaxConns int32
+	MinConns int32
+	URL      string
+}
 
 // Create a new pool connection to postgres database.
 func NewPostgresPool(cfg PostgresConfig) (*pgxpool.Pool, error) {
+	// Parsing postgres config.
+	config, err := pgxpool.ParseConfig(cfg.URL)
+	if err != nil {
+		return nil, errors.New("error parsing config: " + err.Error())
+	}
+
+	// Set max and min client pool connections.
+	config.MaxConns = cfg.MaxConns
+	config.MinConns = cfg.MinConns
+
+	// Set postgres logger.
+	config.ConnConfig.Logger = zerologadapter.NewLogger(zerolog.New(os.Stderr))
+
 	// Connect to postgres database.
-	pool, err := pgxpool.Connect(context.Background(), cfg.URL)
+	pool, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
 		return nil, errors.New("error pool connection to postgres database: " + err.Error())
 	}

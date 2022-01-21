@@ -20,7 +20,7 @@ package main
 import (
 	"flag"
 
-	"github.com/durudex/durudex-user-service/internal/userservice"
+	"github.com/durudex/durudex-user-service/internal/app"
 )
 
 var configPath string // Path to config file.
@@ -37,5 +37,5 @@ func init() {
 // The main function that is called when running the application.
 func main() {
 	// Running a this application.
-	userservice.Run(configPath)
+	app.Run(configPath)
 }
