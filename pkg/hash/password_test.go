@@ -19,42 +19,101 @@ package hash
 
 import "testing"
 
-const (
-	password string = "1234567890"
-	cost     int    = 14
-)
-
 // Testing generating a new password hash.
-func TestHash(t *testing.T) {
-	// Creating a new password manager.
-	manager := NewPassword(cost)
-
-	// Generating a new password hash.
-	hash, err := manager.Hash(password)
-	if err != nil {
-		t.Errorf("error hashing password: %s", err.Error())
+func TestPasswordManager_Hash(t *testing.T) {
+	// Testing args.
+	type args struct {
+		cost     int
+		password string
 	}
 
-	// Check for availability.
-	if hash == "" {
-		t.Error("password hash is empty")
+	// Tests structures.
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			args: args{
+				cost:     14,
+				password: "1234567890",
+			},
+		},
+		{
+			name: "Password not correct",
+			args: args{
+				cost:     14,
+				password: "ne1234567890",
+			},
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Creating a new password manager.
+			manager := NewPassword(tt.args.cost)
+
+			got, err := manager.Hash(tt.args.password)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error hashing password: %s", err.Error())
+			}
+
+			// Check password hash.
+			if got == "" {
+				t.Errorf("error password hash is empty")
+			}
+		})
 	}
 }
 
 // Testing checking password hash.
-func TestCheck(t *testing.T) {
-	// Creating a new password manager.
-	manager := NewPassword(cost)
-
-	// Generating a new password hash.
-	hash, err := manager.Hash(password)
-	if err != nil {
-		t.Errorf("error hashing password: %s", err.Error())
+func TestPasswordManager_Check(t *testing.T) {
+	// Testing args.
+	type args struct {
+		cost     int
+		password string
+		hash     string
 	}
 
-	// Check password hash.
-	status := manager.Check(hash, password)
-	if !status {
-		t.Error("password do not match")
+	// Tests structures.
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "OK",
+			args: args{
+				cost:     14,
+				password: "1234567890",
+				hash:     "$2a$14$SnPQXou3EwjQHDgKb0/b.uKgwD2PRNVVV9m5s4RxE7Zu9v.zL1bSq",
+			},
+			want: true,
+		},
+		{
+			name: "Password not correct",
+			args: args{
+				cost:     14,
+				password: "ne1234567890",
+				hash:     "$2a$14$SnPQXou3EwjQHDgKb0/b.uKgwD2PRNVVV9m5s4RxE7Zu9v.zL1bSq",
+			},
+			want: false,
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Creating a new password manager.
+			manager := NewPassword(tt.args.cost)
+
+			// Check password hash.
+			got := manager.Check(tt.args.hash, tt.args.password)
+			if got != tt.want {
+				t.Error("password are not similar")
+			}
+		})
 	}
 }

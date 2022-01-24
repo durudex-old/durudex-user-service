@@ -19,17 +19,56 @@ package domain
 
 import "testing"
 
-// Testing calidate user.
-func TestValidate(t *testing.T) {
-	// Creating user model.
-	user := User{
-		Username: "Example",
-		Password: "Qwerty123!",
-		Email:    "example@example.com",
+// Testing validate user.
+func TestUser_Validate(t *testing.T) {
+	// Testing args.
+	type args struct {
+		username string
+		email    string
+		password string
 	}
 
-	// Validate user.
-	if err := user.Validate(); err != nil {
-		t.Errorf("error validating user: %s", err.Error())
+	// Tests structures.
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			args: args{
+				username: "Test",
+				email:    "example@example.example",
+				password: "Superpassword123",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Email not correct",
+			args: args{
+				username: "Test",
+				email:    "example.example",
+				password: "Superpassword123",
+			},
+			wantErr: true,
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Creating a new user.
+			user := User{
+				Username: tt.args.username,
+				Email:    tt.args.email,
+				Password: tt.args.password,
+			}
+
+			// Validate user.
+			err := user.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error validation user: %s", err.Error())
+			}
+		})
 	}
 }

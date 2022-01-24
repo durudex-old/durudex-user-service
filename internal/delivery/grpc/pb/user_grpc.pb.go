@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.ID, error)
+	GetByCreds(ctx context.Context, in *GetByCredsRequest, opts ...grpc.CallOption) (*GetByCredsResponse, error)
 }
 
 type userServiceClient struct {
@@ -39,11 +40,21 @@ func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts 
 	return out, nil
 }
 
+func (c *userServiceClient) GetByCreds(ctx context.Context, in *GetByCredsRequest, opts ...grpc.CallOption) (*GetByCredsResponse, error) {
+	out := new(GetByCredsResponse)
+	err := c.cc.Invoke(ctx, "/durudex.user.UserService/GetByCreds", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	Create(context.Context, *CreateRequest) (*types.ID, error)
+	GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -53,6 +64,9 @@ type UnimplementedUserServiceServer struct {
 
 func (UnimplementedUserServiceServer) Create(context.Context, *CreateRequest) (*types.ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedUserServiceServer) GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByCreds not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -85,6 +99,24 @@ func _UserService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetByCreds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByCredsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetByCreds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/durudex.user.UserService/GetByCreds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetByCreds(ctx, req.(*GetByCredsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -95,6 +127,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _UserService_Create_Handler,
+		},
+		{
+			MethodName: "GetByCreds",
+			Handler:    _UserService_GetByCreds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

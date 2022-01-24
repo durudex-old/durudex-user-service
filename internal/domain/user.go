@@ -29,7 +29,7 @@ type User struct {
 	Email     string
 	Password  string
 	JoinedIn  time.Time
-	LastJoin  time.Time
+	LastVisit time.Time
 	Verified  bool
 	AvatarURL *string
 }

@@ -28,6 +28,7 @@ import (
 // User service interface.
 type User interface {
 	Create(ctx context.Context, user domain.User) (uint64, error)
+	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 }
 
 // Service structure.

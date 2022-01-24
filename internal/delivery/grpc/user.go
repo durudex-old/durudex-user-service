@@ -27,6 +27,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // User handler structure.
@@ -56,4 +57,23 @@ func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*typ
 	}
 
 	return &types.ID{Id: id}, nil
+}
+
+// Getting user by credentials.
+func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsRequest) (*pb.GetByCredsResponse, error) {
+	// Getting user by credentials.
+	user, err := h.service.GetByCreds(ctx, input.Username, input.Password)
+	if err != nil {
+		return &pb.GetByCredsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.GetByCredsResponse{
+		Id:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		JoinedIn:  timestamppb.New(user.JoinedIn),
+		LastVisit: timestamppb.New(user.LastVisit),
+		Verified:  user.Verified,
+		AvatarUrl: *user.AvatarURL,
+	}, nil
 }

@@ -24,7 +24,7 @@ import (
 )
 
 // Test initialize config.
-func TestInit(t *testing.T) {
+func TestConfig_Init(t *testing.T) {
 	// Environment configurations.
 	type env struct{ postgresURL string }
 
@@ -47,7 +47,7 @@ func TestInit(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "test config",
+			name: "OK",
 			args: args{
 				path: "fixtures/main",
 				env:  env{postgresURL: "postgres://localhost:1"},
@@ -84,7 +84,7 @@ func TestInit(t *testing.T) {
 
 			// Check for similarity of a config.
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("error config are not similar: %s", err.Error())
+				t.Errorf("error config are not similar")
 			}
 		})
 	}

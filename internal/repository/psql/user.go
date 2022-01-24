@@ -19,7 +19,6 @@ package psql
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
@@ -27,7 +26,7 @@ import (
 )
 
 // User database tables.
-const userTable = "user"
+const userTable string = "user"
 
 // User postgres repository structure.
 type UserRepository struct{ psql postgres.Pool }
@@ -42,13 +41,34 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, 
 	var id uint64
 
 	// Query to create user.
-	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3) RETURNING "id"`, userTable)
+	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3)
+		RETURNING "id"`, userTable)
 
 	// Query and get id.
 	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
-		return 0, errors.New("error creating a new user")
+		return 0, err
 	}
 
 	return id, nil
+}
+
+// Get user by credentials for postgres database.
+func (r *UserRepository) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
+	var user domain.User
+
+	// Query and get user.
+	query := fmt.Sprintf(`SELECT "id", "username", "email", "joined_in", "last_visit",
+		"verified", "avatar_url" FROM "%s" WHERE username=$1 AND password=$2`, userTable)
+
+	row := r.psql.QueryRow(ctx, query, username, password)
+
+	// Scanning query row.
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.JoinedIn, &user.LastVisit,
+		&user.Verified, &user.AvatarURL)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
 }

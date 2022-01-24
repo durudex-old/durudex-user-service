@@ -37,3 +37,8 @@ func NewUserRepository(conn postgres.Pool) *UserRepository {
 func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
 	return r.psql.Create(ctx, user)
 }
+
+// Get user by credentials for postgres database.
+func (r *UserRepository) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
+	return r.psql.GetByCreds(ctx, username, password)
+}

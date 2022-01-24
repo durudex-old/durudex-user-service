@@ -58,3 +58,20 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uint64, err
 
 	return id, nil
 }
+
+// Getting user by credentials.
+func (s *UserService) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
+	// Hashing input user password.
+	hashPassword, err := s.hash.Hash(password)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	// Getting user by credentials.
+	user, err := s.repos.GetByCreds(ctx, username, hashPassword)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
