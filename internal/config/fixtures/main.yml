@@ -14,7 +14,7 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>
 
 grpc:
-  host: user-service.durudex.local
+  host: user.service.durudex.local
   port: 8004
   tls: true
 

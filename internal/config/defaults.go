@@ -19,7 +19,7 @@ package config
 
 const (
 	// Server defaults.
-	defaultServerHost string = "userservice.durudex.local"
+	defaultServerHost string = "user.service.durudex.local"
 	defaultServerPort string = "8004"
 	defaultServerTLS  bool   = true
 
