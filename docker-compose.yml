@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,10 +13,33 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-# Local files
-.bin/
-*.pem
-.DS_Store
+version: '3.8'
 
-# Environments
-.env
+services:
+  app:
+    image: durudex-user-service
+    container_name: durudex-user-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8004:8004
+    depends_on:
+      - postgres
+    volumes:
+      - ./.bin/:/root/
+      - ./certs/:/root/certs/
+      - ./configs/:/root/configs/
+    env_file:
+      - .env
+
+  postgres:
+    image: postgres:latest
+    container_name: user-postgres
+    environment:
+      POSTGRES_DB: durudex
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: qwerty
+    hostname: user.postgres.durudex.local
+    ports:
+      - 5433:5432

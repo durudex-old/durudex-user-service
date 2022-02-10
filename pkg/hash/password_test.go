@@ -40,13 +40,6 @@ func TestPasswordManager_Hash(t *testing.T) {
 				password: "1234567890",
 			},
 		},
-		{
-			name: "Password not correct",
-			args: args{
-				cost:     14,
-				password: "ne1234567890",
-			},
-		},
 	}
 
 	// Conducting tests in various structures.
@@ -93,7 +86,7 @@ func TestPasswordManager_Check(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "Password not correct",
+			name: "Password Not Correct",
 			args: args{
 				cost:     14,
 				password: "ne1234567890",

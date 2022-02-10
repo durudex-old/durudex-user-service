@@ -18,12 +18,12 @@ download:
 	go mod download
 
 .PHONY: build
-build: download
-	go build -o .bin/user-service.exe ./cmd/app/main.go
+build:
+	go mod download && CGO_ENABLE=0 GOOS=linux go build -o ./.bin/app ./cmd/app/main.go
 
 .PHONY: run
-run: download
-	go run ./cmd/app/main.go
+run: build
+	docker-compose up --remove-orphans app
 
 .PHONY: lint
 lint:

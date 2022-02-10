@@ -44,7 +44,7 @@ func TestUser_Validate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Email not correct",
+			name: "Email Not Correct",
 			args: args{
 				username: "Test",
 				email:    "example.example",

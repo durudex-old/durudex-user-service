@@ -1,4 +1,4 @@
-# Copyright © 2021-2022 Durudex
+# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -11,18 +11,10 @@
 # GNU Affero General Public License for more details.
 
 # You should have received a copy of the GNU Affero General Public License
-# along with Durudex. If not, see <https://www.gnu.org/licenses/>
+# along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-server:
-  host: user.service.durudex.local
-  port: 8004
-  tls: true
+FROM alpine:latest
 
-hash:
-  password:
-    cost: 14
+WORKDIR /root/
 
-database:
-  postgres:
-    max-conns: 20
-    min-conns: 5
+ENTRYPOINT ["./app"]

@@ -21,18 +21,18 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/durudex/dugopg"
 	"github.com/durudex/durudex-user-service/internal/domain"
-	"github.com/durudex/durudex-user-service/pkg/database/postgres"
 )
 
 // User database tables.
 const userTable string = "user"
 
 // User postgres repository structure.
-type UserRepository struct{ psql postgres.Pool }
+type UserRepository struct{ psql dugopg.Native }
 
 // Creating a new user postgres repository.
-func NewUserRepository(psql postgres.Pool) *UserRepository {
+func NewUserRepository(psql dugopg.Native) *UserRepository {
 	return &UserRepository{psql: psql}
 }
 

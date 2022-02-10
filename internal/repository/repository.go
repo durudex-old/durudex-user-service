@@ -20,8 +20,8 @@ package repository
 import (
 	"context"
 
+	"github.com/durudex/dugopg"
 	"github.com/durudex/durudex-user-service/internal/domain"
-	"github.com/durudex/durudex-user-service/pkg/database/postgres"
 )
 
 // User repository interface.
@@ -34,6 +34,6 @@ type User interface {
 type Repository struct{ User }
 
 // Creating a new repository.
-func NewRepository(psql postgres.Pool) *Repository {
+func NewRepository(psql dugopg.Native) *Repository {
 	return &Repository{User: NewUserRepository(psql)}
 }
