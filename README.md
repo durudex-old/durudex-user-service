@@ -26,13 +26,21 @@ Service for working with users.
 + [golangci-lint](https://golangci-lint.run/usage/install/)
 
 ## ⚙️ Build & Run
-1) Add variables from `.env.example` to your environment variables:
-```env
-# Postgres database variables:
-POSTGRES_URL=
+1) Add local domains:
+```sh
+user.service.durudex.local
+user.postgres.durudex.local
 ```
-2) Generate certificates, information can be found at [certs/README.md](certs/README.md)
-3) Migrate the database using `make migrate-up`.
+2) Create an `.env` file in the root directory and add the following values from `.env.example`:
+```env
+# Config variables:
+CONFIG_PATH=configs/main
+
+# Postgres database variables:
+POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5433/durudex
+```
+3) Generate certificates, information can be found at [certs/README.md](certs/README.md)
+4) Migrate the database using `make migrate-up`.
 
 Use `make run` to run and `make build` to build project.
 

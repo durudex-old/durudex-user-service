@@ -18,6 +18,9 @@
 package config
 
 const (
+	// Config defaults.
+	defaultConfigPath string = "configs/main"
+
 	// Server defaults.
 	defaultServerHost string = "user.service.durudex.local"
 	defaultServerPort string = "8004"

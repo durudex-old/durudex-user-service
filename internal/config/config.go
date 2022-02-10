@@ -60,14 +60,14 @@ type (
 )
 
 // Initialize config.
-func Init(configPath string) (*Config, error) {
+func Init() (*Config, error) {
 	log.Debug().Msg("Initialize config...")
 
 	// Populate defaults config variables.
 	populateDefaults()
 
 	// Parsing specified when starting the config file.
-	if err := parseConfigFile(configPath); err != nil {
+	if err := parseConfigFile(); err != nil {
 		return nil, err
 	}
 
@@ -85,7 +85,15 @@ func Init(configPath string) (*Config, error) {
 }
 
 // Parsing specified when starting the config file.
-func parseConfigFile(configPath string) error {
+func parseConfigFile() error {
+	// Get config path variable.
+	configPath := os.Getenv("CONFIG_PATH")
+
+	// Check is config path variable empty.
+	if configPath == "" {
+		configPath = defaultConfigPath
+	}
+
 	log.Debug().Msgf("Parsing config file: %s", configPath)
 
 	// Split path to folder and file.
