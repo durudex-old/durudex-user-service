@@ -33,17 +33,13 @@ lint:
 test: lint
 	go test -v ./...
 
-.PHONY: migrate-create
-migrate-create:
-	migrate create -ext sql -dir ./schema -seq durudex
-
 .PHONY: migrate-up
 migrate-up:
-	migrate -path ./schema -database '$(POSTGRES_URL)?sslmode=disable' up
+	migrate -path ./schema/src -database '$(POSTGRES_URL)?sslmode=disable' up
 
 .PHONY: migrate-down
 migrate-down:
-	migrate -path ./schema -database '$(POSTGRES_URL)?sslmode=disable' down
+	migrate -path ./schema/src -database '$(POSTGRES_URL)?sslmode=disable' down
 
 .PHONY: protoc
 protoc:
