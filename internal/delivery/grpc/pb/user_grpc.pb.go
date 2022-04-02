@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type UserServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.ID, error)
 	GetByCreds(ctx context.Context, in *GetByCredsRequest, opts ...grpc.CallOption) (*GetByCredsResponse, error)
+	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*types.Status, error)
 }
 
 type userServiceClient struct {
@@ -49,12 +50,22 @@ func (c *userServiceClient) GetByCreds(ctx context.Context, in *GetByCredsReques
 	return out, nil
 }
 
+func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*types.Status, error) {
+	out := new(types.Status)
+	err := c.cc.Invoke(ctx, "/durudex.user.UserService/ForgotPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	Create(context.Context, *CreateRequest) (*types.ID, error)
 	GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error)
+	ForgotPassword(context.Context, *ForgotPasswordRequest) (*types.Status, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -67,6 +78,9 @@ func (UnimplementedUserServiceServer) Create(context.Context, *CreateRequest) (*
 }
 func (UnimplementedUserServiceServer) GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByCreds not implemented")
+}
+func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *ForgotPasswordRequest) (*types.Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -117,6 +131,24 @@ func _UserService_GetByCreds_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ForgotPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ForgotPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/durudex.user.UserService/ForgotPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*ForgotPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +163,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetByCreds",
 			Handler:    _UserService_GetByCreds_Handler,
+		},
+		{
+			MethodName: "ForgotPassword",
+			Handler:    _UserService_ForgotPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

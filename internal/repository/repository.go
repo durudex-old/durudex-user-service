@@ -17,18 +17,7 @@
 
 package repository
 
-import (
-	"context"
-
-	"github.com/durudex/dugopg"
-	"github.com/durudex/durudex-user-service/internal/domain"
-)
-
-// User repository interface.
-type User interface {
-	Create(ctx context.Context, user domain.User) (uint64, error)
-	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
-}
+import "github.com/durudex/dugopg"
 
 // Repository structure.
 type Repository struct{ User }

@@ -25,6 +25,13 @@ import (
 	"github.com/durudex/durudex-user-service/internal/repository/psql"
 )
 
+// User repository interface.
+type User interface {
+	Create(ctx context.Context, user domain.User) (uint64, error)
+	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
+	ForgotPassword(ctx context.Context, password, email string) error
+}
+
 // User repository structure.
 type UserRepository struct{ psql *psql.UserRepository }
 
@@ -38,7 +45,12 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, 
 	return r.psql.Create(ctx, user)
 }
 
-// Get user by credentials for postgres database.
+// Get user by credentials in postgres database.
 func (r *UserRepository) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
 	return r.psql.GetByCreds(ctx, username, password)
+}
+
+// Forgot user password in postgres database.
+func (r *UserRepository) ForgotPassword(ctx context.Context, email, password string) error {
+	return r.psql.ForgotPassword(ctx, password, email)
 }

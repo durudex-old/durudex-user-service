@@ -28,7 +28,7 @@ import (
 	"github.com/pashagolub/pgxmock"
 )
 
-// Testing creating a new user in postgres datatabe.
+// Testing creating a new user in postgres database.
 func TestUserRepository_Create(t *testing.T) {
 	// Creating a new mock connection.
 	mock, err := pgxmock.NewConn()
@@ -57,9 +57,9 @@ func TestUserRepository_Create(t *testing.T) {
 		{
 			name: "OK",
 			args: args{user: domain.User{
-				Username: "Test",
+				Username: "example",
 				Email:    "example@example.example",
-				Password: "superpassword",
+				Password: "qwerty",
 			}},
 			want: 1,
 			mockBehavior: func(args args, want uint64) {
@@ -75,7 +75,7 @@ func TestUserRepository_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.args, tt.want)
 
-			// Creating a new user in postgres datatabe.
+			// Creating a new user in postgres database.
 			got, err := repos.Create(context.Background(), tt.args.user)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error creating user: %s", err.Error())
@@ -89,7 +89,7 @@ func TestUserRepository_Create(t *testing.T) {
 	}
 }
 
-// Testing getting user by credentials for postgres database.
+// Testing getting user by credentials in postgres database.
 func TestUserRepository_GetByCreds(t *testing.T) {
 	// Creating a new mock connection.
 	mock, err := pgxmock.NewConn()
@@ -99,10 +99,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 	defer mock.Close(context.Background())
 
 	// Testing args.
-	type args struct {
-		username string
-		password string
-	}
+	type args struct{ username, password string }
 
 	// Test bahavior.
 	type mockBehavior func(args args, user domain.User)
@@ -120,13 +117,10 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{
-				username: "Test",
-				password: "superpassword",
-			},
+			args: args{username: "example", password: "qwerty"},
 			want: domain.User{
 				ID:        1,
-				Username:  "Test",
+				Username:  "example",
 				Email:     "example@example.example",
 				JoinedIn:  time.Now(),
 				LastVisit: time.Now(),
@@ -162,6 +156,56 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 			// Check for similarity of user.
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Error("error user are not similar")
+			}
+		})
+	}
+}
+
+// Testing forgot password in postgres database.
+func TestUserRepository_ForgotPassword(t *testing.T) {
+	// Creating a new mock connection.
+	mock, err := pgxmock.NewConn()
+	if err != nil {
+		t.Fatalf("error creating a new mock connection: %s", err.Error())
+	}
+	defer mock.Close(context.Background())
+
+	// Testing args.
+	type args struct{ email, password string }
+
+	// Test bahavior.
+	type mockBehavior func(args args)
+
+	// Creating a new repository.
+	repos := NewUserRepository(mock)
+
+	// Tests structures.
+	tests := []struct {
+		name         string
+		args         args
+		wantErr      bool
+		mockBehavior mockBehavior
+	}{
+		{
+			name: "OK",
+			args: args{email: "example@example.example", password: "qwerty"},
+			mockBehavior: func(args args) {
+				mock.ExpectExec(`UPDATE "user"`).
+					WithArgs(args.password, args.email).
+					WillReturnResult(pgxmock.NewResult("", 1))
+			},
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior(tt.args)
+
+			// Forgot password in postgres database.
+			err := repos.ForgotPassword(context.Background(), tt.args.password, tt.args.email)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error forgot user password: %s", err.Error())
 			}
 		})
 	}

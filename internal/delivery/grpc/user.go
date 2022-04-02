@@ -59,7 +59,7 @@ func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*typ
 	return &types.ID{Id: id}, nil
 }
 
-// Getting user by credentials.
+// Getting user by credentials handler.
 func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsRequest) (*pb.GetByCredsResponse, error) {
 	// Getting user by credentials.
 	user, err := h.service.GetByCreds(ctx, input.Username, input.Password)
@@ -76,4 +76,14 @@ func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsReques
 		Verified:  user.Verified,
 		AvatarUrl: *user.AvatarURL,
 	}, nil
+}
+
+// Forgot user password handler.
+func (h *UserHandler) ForgotPassword(ctx context.Context, input *pb.ForgotPasswordRequest) (*types.Status, error) {
+	userStatus, err := h.service.ForgotPassword(ctx, input.Password, input.Email)
+	if err != nil {
+		return &types.Status{Status: userStatus}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.Status{Status: userStatus}, nil
 }

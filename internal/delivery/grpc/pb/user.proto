@@ -23,10 +23,12 @@ option go_package = "github.com/durudex/durudex-user-service/internal/delivery/g
 
 import "google/protobuf/timestamp.proto";
 import "internal/delivery/grpc/pb/types/id.proto";
+import "internal/delivery/grpc/pb/types/status.proto";
 
 service UserService {
   rpc Create (CreateRequest) returns (types.ID);
   rpc GetByCreds (GetByCredsRequest) returns (GetByCredsResponse);
+  rpc ForgotPassword (ForgotPasswordRequest) returns (types.Status);
 }
 
 // Create user request message.
@@ -51,4 +53,10 @@ message GetByCredsResponse {
   google.protobuf.Timestamp lastVisit = 5;
   bool verified = 6;
   string avatarUrl = 7;
+}
+
+// Request for forgot password.
+message ForgotPasswordRequest {
+  string email = 1;
+  string password = 2;
 }

@@ -25,6 +25,13 @@ import (
 	"github.com/durudex/durudex-user-service/pkg/hash"
 )
 
+// User service interface.
+type User interface {
+	Create(ctx context.Context, user domain.User) (uint64, error)
+	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
+	ForgotPassword(ctx context.Context, password, email string) (bool, error)
+}
+
 // User service structure.
 type UserService struct {
 	repos repository.User
@@ -50,7 +57,7 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uint64, err
 	}
 	user.Password = hashPassword
 
-	// Creating a new user in postgres datatabe.
+	// Creating a new user in postgres database.
 	id, err := s.repos.Create(ctx, user)
 	if err != nil {
 		return 0, err
@@ -74,4 +81,20 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 	}
 
 	return user, nil
+}
+
+// Forgot user password.
+func (s *UserService) ForgotPassword(ctx context.Context, password, email string) (bool, error) {
+	// Hashing input user password.
+	hashPassword, err := s.hash.Hash(password)
+	if err != nil {
+		return false, err
+	}
+
+	// Forgot password.
+	if err := s.repos.ForgotPassword(ctx, hashPassword, email); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

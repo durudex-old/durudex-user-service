@@ -36,7 +36,7 @@ func NewUserRepository(psql dugopg.Native) *UserRepository {
 	return &UserRepository{psql: psql}
 }
 
-// Creating a new user in postgres datatabe.
+// Creating a new user in postgres database.
 func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
 	var id uint64
 
@@ -53,11 +53,11 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, 
 	return id, nil
 }
 
-// Get user by credentials for postgres database.
+// Get user by credentials in postgres database.
 func (r *UserRepository) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
 	var user domain.User
 
-	// Query and get user.
+	// Query for get user by username and password.
 	query := fmt.Sprintf(`SELECT "id", "username", "email", "joined_in", "last_visit",
 		"verified", "avatar_url" FROM "%s" WHERE username=$1 AND password=$2`, userTable)
 
@@ -71,4 +71,13 @@ func (r *UserRepository) GetByCreds(ctx context.Context, username, password stri
 	}
 
 	return user, nil
+}
+
+// Forgot password in postgres database.
+func (r *UserRepository) ForgotPassword(ctx context.Context, password, email string) error {
+	// Query to update user password.
+	query := fmt.Sprintf(`UPDATE "%s" SET password=$1 WHERE email=$2`, userTable)
+	_, err := r.psql.Exec(ctx, query, password, email)
+
+	return err
 }
