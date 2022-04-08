@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.ID, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.UUID, error)
 	GetByCreds(ctx context.Context, in *GetByCredsRequest, opts ...grpc.CallOption) (*GetByCredsResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*types.Status, error)
 }
@@ -32,8 +32,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.ID, error) {
-	out := new(types.ID)
+func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.UUID, error) {
+	out := new(types.UUID)
 	err := c.cc.Invoke(ctx, "/durudex.user.UserService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswo
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	Create(context.Context, *CreateRequest) (*types.ID, error)
+	Create(context.Context, *CreateRequest) (*types.UUID, error)
 	GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*types.Status, error)
 	mustEmbedUnimplementedUserServiceServer()
@@ -73,7 +73,7 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) Create(context.Context, *CreateRequest) (*types.ID, error) {
+func (UnimplementedUserServiceServer) Create(context.Context, *CreateRequest) (*types.UUID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedUserServiceServer) GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error) {

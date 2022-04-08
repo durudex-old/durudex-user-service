@@ -23,6 +23,8 @@ import (
 
 	"github.com/durudex/dugopg"
 	"github.com/durudex/durudex-user-service/internal/domain"
+
+	"github.com/gofrs/uuid"
 )
 
 // User database tables.
@@ -37,8 +39,8 @@ func NewUserRepository(psql dugopg.Native) *UserRepository {
 }
 
 // Creating a new user in postgres database.
-func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
-	var id uint64
+func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUID, error) {
+	var id uuid.UUID
 
 	// Query to create user.
 	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3)
@@ -47,7 +49,7 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, 
 	// Query and get id.
 	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
-		return 0, err
+		return uuid.UUID{}, err
 	}
 
 	return id, nil

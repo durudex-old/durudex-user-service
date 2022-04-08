@@ -22,7 +22,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/durudex/dugopg"
+	"github.com/durudex/dugopg/logger/dugopgzerolog"
+	"github.com/durudex/dugopg/pool"
+	"github.com/durudex/dugopg/types"
+	"github.com/durudex/dugopg/types/uuid"
 	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/delivery/grpc"
 	"github.com/durudex/durudex-user-service/internal/repository"
@@ -44,10 +47,12 @@ func Run() {
 	log.Debug().Msg("Creating connections to postgres database...")
 
 	// Creating a new postgres connections.
-	psql, err := dugopg.NewPool(dugopg.PoolConfig{
+	psql, err := pool.NewPool(pool.Config{
 		URL:      cfg.Database.Postgres.URL,
 		MaxConns: cfg.Database.Postgres.MaxConns,
 		MinConns: cfg.Database.Postgres.MinConns,
+		Logger:   dugopgzerolog.Init(),
+		Types:    []types.DataType{uuid.UUID},
 	})
 	if err != nil {
 		log.Error().Msgf("error connection to postgres database: %s", err.Error())

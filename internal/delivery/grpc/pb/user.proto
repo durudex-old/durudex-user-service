@@ -22,11 +22,11 @@ package durudex.user;
 option go_package = "github.com/durudex/durudex-user-service/internal/delivery/grpc/pb;pb";
 
 import "google/protobuf/timestamp.proto";
-import "internal/delivery/grpc/pb/types/id.proto";
+import "internal/delivery/grpc/pb/types/uuid.proto";
 import "internal/delivery/grpc/pb/types/status.proto";
 
 service UserService {
-  rpc Create (CreateRequest) returns (types.ID);
+  rpc Create (CreateRequest) returns (types.UUID);
   rpc GetByCreds (GetByCredsRequest) returns (GetByCredsResponse);
   rpc ForgotPassword (ForgotPasswordRequest) returns (types.Status);
 }
@@ -46,7 +46,7 @@ message GetByCredsRequest {
 
 // Response for getting user by credentials.
 message GetByCredsResponse {
-  uint64 id = 1;
+  types.UUID id = 1;
   string username = 2;
   string email = 3;
   google.protobuf.Timestamp joinedIn = 4;

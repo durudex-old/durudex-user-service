@@ -20,11 +20,13 @@ package domain
 import (
 	"errors"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 // User model.
 type User struct {
-	ID        uint64
+	ID        uuid.UUID
 	Username  string
 	Email     string
 	Password  string

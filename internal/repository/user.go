@@ -23,11 +23,13 @@ import (
 	"github.com/durudex/dugopg"
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/psql"
+
+	"github.com/gofrs/uuid"
 )
 
 // User repository interface.
 type User interface {
-	Create(ctx context.Context, user domain.User) (uint64, error)
+	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
 }
@@ -41,7 +43,7 @@ func NewUserRepository(conn dugopg.Native) *UserRepository {
 }
 
 // Creating a new user in postgres datatabe.
-func (r *UserRepository) Create(ctx context.Context, user domain.User) (uint64, error) {
+func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUID, error) {
 	return r.psql.Create(ctx, user)
 }
 

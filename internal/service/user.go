@@ -23,11 +23,13 @@ import (
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository"
 	"github.com/durudex/durudex-user-service/pkg/hash"
+
+	"github.com/gofrs/uuid"
 )
 
 // User service interface.
 type User interface {
-	Create(ctx context.Context, user domain.User) (uint64, error)
+	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) (bool, error)
 }
@@ -44,23 +46,23 @@ func NewUserService(repos repository.User, hash hash.Password) *UserService {
 }
 
 // Creating a new user.
-func (s *UserService) Create(ctx context.Context, user domain.User) (uint64, error) {
+func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, error) {
 	// Validate user.
 	if err := user.Validate(); err != nil {
-		return 0, err
+		return uuid.UUID{}, err
 	}
 
 	// Hasing user password.
 	hashPassword, err := s.hash.Hash(user.Password)
 	if err != nil {
-		return 0, err
+		return uuid.UUID{}, err
 	}
 	user.Password = hashPassword
 
 	// Creating a new user in postgres database.
 	id, err := s.repos.Create(ctx, user)
 	if err != nil {
-		return 0, err
+		return uuid.UUID{}, err
 	}
 
 	return id, nil

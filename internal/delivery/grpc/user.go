@@ -42,7 +42,7 @@ func NewUserHandler(service service.User) *UserHandler {
 }
 
 // Create user handler.
-func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*types.ID, error) {
+func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*types.UUID, error) {
 	// Create user model
 	user := domain.User{
 		Username: input.Username,
@@ -53,10 +53,10 @@ func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*typ
 	// Creating a new user.
 	id, err := h.service.Create(ctx, user)
 	if err != nil {
-		return &types.ID{Id: 0}, status.Error(codes.Internal, err.Error())
+		return &types.UUID{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &types.ID{Id: id}, nil
+	return &types.UUID{Value: id.Bytes()}, nil
 }
 
 // Getting user by credentials handler.
@@ -68,7 +68,7 @@ func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsReques
 	}
 
 	return &pb.GetByCredsResponse{
-		Id:        user.ID,
+		Id:        &types.UUID{Value: user.ID.Bytes()},
 		Username:  user.Username,
 		Email:     user.Email,
 		JoinedIn:  timestamppb.New(user.JoinedIn),

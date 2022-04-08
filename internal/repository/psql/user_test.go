@@ -25,6 +25,7 @@ import (
 
 	"github.com/durudex/durudex-user-service/internal/domain"
 
+	"github.com/gofrs/uuid"
 	"github.com/pashagolub/pgxmock"
 )
 
@@ -41,7 +42,7 @@ func TestUserRepository_Create(t *testing.T) {
 	type args struct{ user domain.User }
 
 	// Test bahavior.
-	type mockBehavior func(args args, id uint64)
+	type mockBehavior func(args args, id uuid.UUID)
 
 	// Creating a new repository.
 	repos := NewUserRepository(mock)
@@ -50,7 +51,7 @@ func TestUserRepository_Create(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         args
-		want         uint64
+		want         uuid.UUID
 		wantErr      bool
 		mockBehavior mockBehavior
 	}{
@@ -61,8 +62,8 @@ func TestUserRepository_Create(t *testing.T) {
 				Email:    "example@example.example",
 				Password: "qwerty",
 			}},
-			want: 1,
-			mockBehavior: func(args args, want uint64) {
+			want: uuid.UUID{},
+			mockBehavior: func(args args, want uuid.UUID) {
 				mock.ExpectQuery(`INSERT INTO "user"`).
 					WithArgs(args.user.Username, args.user.Email, args.user.Password).
 					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want))
@@ -119,7 +120,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 			name: "OK",
 			args: args{username: "example", password: "qwerty"},
 			want: domain.User{
-				ID:        1,
+				ID:        uuid.UUID{},
 				Username:  "example",
 				Email:     "example@example.example",
 				JoinedIn:  time.Now(),
