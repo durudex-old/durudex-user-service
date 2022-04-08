@@ -15,11 +15,11 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
- syntax = "proto3";
+syntax = "proto3";
 
- package types;
+package types;
 
- option go_package = "github.com/durudex/durudex-user-service/internal/delivery/grpc/pb/types;types";
+option go_package = "github.com/durudex/durudex-user-service/internal/delivery/grpc/pb/types;types";
 
 // UUID type.
 message UUID { bytes value = 1; }

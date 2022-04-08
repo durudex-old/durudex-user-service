@@ -68,7 +68,7 @@ func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsReques
 	}
 
 	return &pb.GetByCredsResponse{
-		Id:        &types.UUID{Value: user.ID.Bytes()},
+		Id:        user.ID.Bytes(),
 		Username:  user.Username,
 		Email:     user.Email,
 		JoinedIn:  timestamppb.New(user.JoinedIn),
