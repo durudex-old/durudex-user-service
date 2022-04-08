@@ -63,3 +63,4 @@ Copyright © 2021-2022 [Durudex](https://github.com/durudex). Released under the
 + [dugopg](https://github.com/durudex/dugopg/blob/master/LICENSE)
 + [crypto](https://github.com/golang/crypto/blob/master/LICENSE)
 + [pgxmock](https://github.com/pashagolub/pgxmock/blob/master/LICENSE)
++ [uuid](https://github.com/gofrs/uuid/blob/master/LICENSE)
