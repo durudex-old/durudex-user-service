@@ -100,7 +100,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 	defer mock.Close(context.Background())
 
 	// Testing args.
-	type args struct{ username, password string }
+	type args struct{ username string }
 
 	// Test bahavior.
 	type mockBehavior func(args args, user domain.User)
@@ -123,6 +123,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 				ID:        uuid.UUID{},
 				Username:  "example",
 				Email:     "example@example.example",
+				Password:  "qwerty123",
 				JoinedIn:  time.Now(),
 				LastVisit: time.Now(),
 				Verified:  true,
@@ -130,11 +131,11 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"id", "username", "email", "joined_in", "last_visit", "verified",
-					"avatar_url",
+					"id", "username", "email", "password", "joined_in", "last_visit",
+					"verified", "avatar_url",
 				}).AddRow(
-					user.ID, user.Username, user.Email, user.JoinedIn, user.LastVisit,
-					user.Verified, user.AvatarURL)
+					user.ID, user.Username, user.Email, user.Password, user.JoinedIn,
+					user.LastVisit, user.Verified, user.AvatarURL)
 
 				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
 					WithArgs(args.username).
