@@ -88,6 +88,11 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 
 // Forgot user password.
 func (s *UserService) ForgotPassword(ctx context.Context, password, email string) (bool, error) {
+	// Check user password.
+	if !domain.RxPassword.MatchString(password) {
+		return false, domain.ErrPasswordIsIncorrect
+	}
+
 	// Hashing input user password.
 	hashPassword, err := s.hash.Hash(password)
 	if err != nil {

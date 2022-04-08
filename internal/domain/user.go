@@ -24,6 +24,12 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+var (
+	ErrPasswordIsIncorrect = errors.New("error password is incorrect")
+	ErrUsernameIsIncorrect = errors.New("error username is incorrect")
+	ErrEmailIsIncorrect    = errors.New("error email is incorrect")
+)
+
 // User model.
 type User struct {
 	ID        uuid.UUID
@@ -39,12 +45,12 @@ type User struct {
 // Validate user.
 func (u *User) Validate() error {
 	switch {
-	case !rxUsername.MatchString(u.Username):
-		return errors.New("error username is incorrect")
-	case !rxPassword.MatchString(u.Password):
-		return errors.New("error password is incorrect")
-	case !rxEmail.MatchString(u.Email):
-		return errors.New("error email is incorrect")
+	case !RxUsername.MatchString(u.Username):
+		return ErrUsernameIsIncorrect
+	case !RxPassword.MatchString(u.Password):
+		return ErrPasswordIsIncorrect
+	case !RxEmail.MatchString(u.Email):
+		return ErrEmailIsIncorrect
 	}
 
 	return nil

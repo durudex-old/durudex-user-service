@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	rxUsername = regexp.MustCompile(Username)
-	rxPassword = regexp.MustCompile(Password)
-	rxEmail    = regexp.MustCompile(Email)
+	RxUsername = regexp.MustCompile(Username)
+	RxPassword = regexp.MustCompile(Password)
+	RxEmail    = regexp.MustCompile(Email)
 )
