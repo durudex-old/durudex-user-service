@@ -56,17 +56,17 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUI
 }
 
 // Get user by credentials in postgres database.
-func (r *UserRepository) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
+func (r *UserRepository) GetByCreds(ctx context.Context, username string) (domain.User, error) {
 	var user domain.User
 
 	// Query for get user by username and password.
-	query := fmt.Sprintf(`SELECT "id", "username", "email", "joined_in", "last_visit",
-		"verified", "avatar_url" FROM "%s" WHERE username=$1 AND password=$2`, userTable)
+	query := fmt.Sprintf(`SELECT "id", "username", "email", "password", "joined_in", "last_visit",
+		"verified", "avatar_url" FROM "%s" WHERE username=$1`, userTable)
 
-	row := r.psql.QueryRow(ctx, query, username, password)
+	row := r.psql.QueryRow(ctx, query, username)
 
 	// Scanning query row.
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.JoinedIn, &user.LastVisit,
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.JoinedIn, &user.LastVisit,
 		&user.Verified, &user.AvatarURL)
 	if err != nil {
 		return domain.User{}, err

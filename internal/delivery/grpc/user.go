@@ -74,7 +74,7 @@ func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsReques
 		JoinedIn:  timestamppb.New(user.JoinedIn),
 		LastVisit: timestamppb.New(user.LastVisit),
 		Verified:  user.Verified,
-		AvatarUrl: *user.AvatarURL,
+		AvatarUrl: "", // TODO: Fix this
 	}, nil
 }
 

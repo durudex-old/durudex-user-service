@@ -118,7 +118,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{username: "example", password: "qwerty"},
+			args: args{username: "example"},
 			want: domain.User{
 				ID:        uuid.UUID{},
 				Username:  "example",
@@ -137,7 +137,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 					user.Verified, user.AvatarURL)
 
 				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
-					WithArgs(args.username, args.password).
+					WithArgs(args.username).
 					WillReturnRows(rows)
 			},
 		},
@@ -149,7 +149,7 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 			tt.mockBehavior(tt.args, tt.want)
 
 			// Getting user by credentials.
-			got, err := repos.GetByCreds(context.Background(), tt.args.username, tt.args.password)
+			got, err := repos.GetByCreds(context.Background(), tt.args.username)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error getting user by credentials: %s", err.Error())
 			}
