@@ -22,6 +22,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    hostname: user.service.durudex.local
     ports:
       - 8004:8004
     depends_on:
