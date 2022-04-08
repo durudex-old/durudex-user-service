@@ -32,6 +32,9 @@ services:
       - ./configs/:/root/configs/
     env_file:
       - .env
+    networks:
+      - durudex-backend
+      - durudex-database
 
   postgres:
     image: postgres:latest
@@ -43,3 +46,19 @@ services:
     hostname: user.postgres.durudex.local
     ports:
       - 5433:5432
+    volumes:
+      - durudex:/var/lib/postgresql/data
+    networks:
+      - durudex-database
+
+volumes:
+  durudex:
+    name: durudex
+
+networks:
+  durudex-backend:
+    driver: bridge
+    name: durudex-backend
+  durudex-database:
+    driver: bridge
+    name: durudex-database

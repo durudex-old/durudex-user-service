@@ -37,7 +37,7 @@ user.postgres.durudex.local
 CONFIG_PATH=configs/main
 
 # Postgres database variables:
-POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5433/durudex
+POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5432/durudex
 ```
 3) Generate certificates, information can be found at [certs/README.md](certs/README.md)
 4) Migrate the database using `make migrate-up`.
