@@ -30,7 +30,8 @@ import (
 // User repository interface.
 type User interface {
 	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
-	GetByCreds(ctx context.Context, username string) (domain.User, error)
+	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
+	GetByUsername(ctx context.Context, username string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
 }
 
@@ -42,17 +43,22 @@ func NewUserRepository(conn dugopg.Native) *UserRepository {
 	return &UserRepository{psql: psql.NewUserRepository(conn)}
 }
 
-// Creating a new user in postgres datababe.
+// Creating a new user in datababe.
 func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUID, error) {
 	return r.psql.Create(ctx, user)
 }
 
-// Get user by credentials in postgres database.
-func (r *UserRepository) GetByCreds(ctx context.Context, username string) (domain.User, error) {
-	return r.psql.GetByCreds(ctx, username)
+// Get user by id in database.
+func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	return r.psql.GetByID(ctx, id)
 }
 
-// Forgot user password in postgres database.
+// Get user by username in database.
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+	return r.psql.GetByUsername(ctx, username)
+}
+
+// Forgot user password in database.
 func (r *UserRepository) ForgotPassword(ctx context.Context, email, password string) error {
 	return r.psql.ForgotPassword(ctx, password, email)
 }

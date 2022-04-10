@@ -90,8 +90,76 @@ func TestUserRepository_Create(t *testing.T) {
 	}
 }
 
-// Testing getting user by credentials in postgres database.
-func TestUserRepository_GetByCreds(t *testing.T) {
+// Testing getting user by id in postgres database.
+func TestUserRepository_GetByID(t *testing.T) {
+	// Creating a new mock connection.
+	mock, err := pgxmock.NewConn()
+	if err != nil {
+		t.Fatalf("error creating a new mock connection: %s", err.Error())
+	}
+	defer mock.Close(context.Background())
+
+	// Testing args.
+	type args struct{ id uuid.UUID }
+
+	// Test bahavior.
+	type mockBehavior func(args args, user domain.User)
+
+	// Creating a new repository.
+	repos := NewUserRepository(mock)
+
+	// Tests structures.
+	tests := []struct {
+		name         string
+		args         args
+		want         domain.User
+		wantErr      bool
+		mockBehavior mockBehavior
+	}{
+		{
+			name: "OK",
+			args: args{id: uuid.UUID{}},
+			want: domain.User{
+				Username:  "example",
+				JoinedIn:  time.Now(),
+				LastVisit: time.Now(),
+				Verified:  true,
+				AvatarURL: nil,
+			},
+			mockBehavior: func(args args, user domain.User) {
+				rows := mock.NewRows([]string{
+					"username", "joined_in", "last_visit", "verified", "avatar_url",
+				}).AddRow(
+					user.Username, user.JoinedIn, user.LastVisit, user.Verified, user.AvatarURL)
+
+				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
+					WithArgs(args.id).
+					WillReturnRows(rows)
+			},
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior(tt.args, tt.want)
+
+			// Getting user by id.
+			got, err := repos.GetByID(context.Background(), tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error getting user by id: %s", err.Error())
+			}
+
+			// Check for similarity of user.
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Error("error user are not similar")
+			}
+		})
+	}
+}
+
+// Testing getting user by username in postgres database.
+func TestUserRepository_GetByUsername(t *testing.T) {
 	// Creating a new mock connection.
 	mock, err := pgxmock.NewConn()
 	if err != nil {
@@ -131,10 +199,10 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"id", "username", "email", "password", "joined_in", "last_visit",
+					"id", "email", "password", "joined_in", "last_visit",
 					"verified", "avatar_url",
 				}).AddRow(
-					user.ID, user.Username, user.Email, user.Password, user.JoinedIn,
+					user.ID, user.Email, user.Password, user.JoinedIn,
 					user.LastVisit, user.Verified, user.AvatarURL)
 
 				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
@@ -149,10 +217,10 @@ func TestUserRepository_GetByCreds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.args, tt.want)
 
-			// Getting user by credentials.
-			got, err := repos.GetByCreds(context.Background(), tt.args.username)
+			// Getting user by username.
+			got, err := repos.GetByUsername(context.Background(), tt.args.username)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("error getting user by credentials: %s", err.Error())
+				t.Errorf("error getting user by username: %s", err.Error())
 			}
 
 			// Check for similarity of user.

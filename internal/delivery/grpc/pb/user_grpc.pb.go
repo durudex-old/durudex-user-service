@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.UUID, error)
+	GetByID(ctx context.Context, in *types.UUID, opts ...grpc.CallOption) (*User, error)
 	GetByCreds(ctx context.Context, in *GetByCredsRequest, opts ...grpc.CallOption) (*GetByCredsResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*types.Status, error)
 }
@@ -35,6 +36,15 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*types.UUID, error) {
 	out := new(types.UUID)
 	err := c.cc.Invoke(ctx, "/durudex.user.UserService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetByID(ctx context.Context, in *types.UUID, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/durudex.user.UserService/GetByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +74,7 @@ func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswo
 // for forward compatibility
 type UserServiceServer interface {
 	Create(context.Context, *CreateRequest) (*types.UUID, error)
+	GetByID(context.Context, *types.UUID) (*User, error)
 	GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*types.Status, error)
 	mustEmbedUnimplementedUserServiceServer()
@@ -75,6 +86,9 @@ type UnimplementedUserServiceServer struct {
 
 func (UnimplementedUserServiceServer) Create(context.Context, *CreateRequest) (*types.UUID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedUserServiceServer) GetByID(context.Context, *types.UUID) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
 }
 func (UnimplementedUserServiceServer) GetByCreds(context.Context, *GetByCredsRequest) (*GetByCredsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByCreds not implemented")
@@ -109,6 +123,24 @@ func _UserService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Create(ctx, req.(*CreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(types.UUID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/durudex.user.UserService/GetByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetByID(ctx, req.(*types.UUID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -159,6 +191,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _UserService_Create_Handler,
+		},
+		{
+			MethodName: "GetByID",
+			Handler:    _UserService_GetByID_Handler,
 		},
 		{
 			MethodName: "GetByCreds",

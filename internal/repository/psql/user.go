@@ -55,18 +55,41 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUI
 	return id, nil
 }
 
-// Get user by credentials in postgres database.
-func (r *UserRepository) GetByCreds(ctx context.Context, username string) (domain.User, error) {
+// Get user by id in postgres database.
+func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	var user domain.User
 
-	// Query for get user by username and password.
-	query := fmt.Sprintf(`SELECT "id", "username", "email", "password", "joined_in", "last_visit",
-		"verified", "avatar_url" FROM "%s" WHERE username=$1`, userTable)
+	user.ID = id
+
+	// Query for get user by id.
+	query := fmt.Sprintf(`SELECT "username", "joined_in", "last_visit", "verified", "avatar_url"
+		FROM "%s" WHERE "id"=$1`, userTable)
+
+	row := r.psql.QueryRow(ctx, query, id)
+
+	// Scanning query row.
+	err := row.Scan(&user.Username, &user.JoinedIn, &user.LastVisit, &user.Verified, &user.AvatarURL)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+}
+
+// Get user by username in postgres database.
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+	var user domain.User
+
+	user.Username = username
+
+	// Query for get user by username.
+	query := fmt.Sprintf(`SELECT "id", "email", "password", "joined_in", "last_visit", "verified",
+	"avatar_url" FROM "%s" WHERE username=$1`, userTable)
 
 	row := r.psql.QueryRow(ctx, query, username)
 
 	// Scanning query row.
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.JoinedIn, &user.LastVisit,
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.JoinedIn, &user.LastVisit,
 		&user.Verified, &user.AvatarURL)
 	if err != nil {
 		return domain.User{}, err

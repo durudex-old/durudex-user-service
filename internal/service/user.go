@@ -20,7 +20,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository"
@@ -32,6 +31,7 @@ import (
 // User service interface.
 type User interface {
 	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
+	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) (bool, error)
 }
@@ -60,7 +60,7 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, 
 		return uuid.UUID{}, err
 	}
 	user.Password = hashPassword
-	fmt.Println(user.Password)
+
 	// Creating a new user in postgres database.
 	id, err := s.repos.Create(ctx, user)
 	if err != nil {
@@ -70,10 +70,21 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, 
 	return id, nil
 }
 
+// Getting user by id.
+func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	// Getting user by id.
+	user, err := s.repos.GetByID(ctx, id)
+	if err != nil {
+		return domain.User{}, nil
+	}
+
+	return user, nil
+}
+
 // Getting user by credentials.
 func (s *UserService) GetByCreds(ctx context.Context, username, password string) (domain.User, error) {
-	// Getting user by credentials.
-	user, err := s.repos.GetByCreds(ctx, username)
+	// Getting user by username.
+	user, err := s.repos.GetByUsername(ctx, username)
 	if err != nil {
 		return user, err
 	}
