@@ -62,13 +62,13 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User
 	user.ID = id
 
 	// Query for get user by id.
-	query := fmt.Sprintf(`SELECT "username", "joined_in", "last_visit", "verified", "avatar_url"
+	query := fmt.Sprintf(`SELECT "username", "created_at", "last_visit", "verified", "avatar_url"
 		FROM "%s" WHERE "id"=$1`, userTable)
 
 	row := r.psql.QueryRow(ctx, query, id)
 
 	// Scanning query row.
-	err := row.Scan(&user.Username, &user.JoinedIn, &user.LastVisit, &user.Verified, &user.AvatarURL)
+	err := row.Scan(&user.Username, &user.CreatedAt, &user.LastVisit, &user.Verified, &user.AvatarURL)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -83,13 +83,13 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 	user.Username = username
 
 	// Query for get user by username.
-	query := fmt.Sprintf(`SELECT "id", "email", "password", "joined_in", "last_visit", "verified",
+	query := fmt.Sprintf(`SELECT "id", "email", "password", "created_at", "last_visit", "verified",
 	"avatar_url" FROM "%s" WHERE username=$1`, userTable)
 
 	row := r.psql.QueryRow(ctx, query, username)
 
 	// Scanning query row.
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.JoinedIn, &user.LastVisit,
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt, &user.LastVisit,
 		&user.Verified, &user.AvatarURL)
 	if err != nil {
 		return domain.User{}, err

@@ -35,7 +35,7 @@ service UserService {
 // Public user structure.
 message User {
   string username = 1;
-  google.protobuf.Timestamp joinedIn = 2;
+  google.protobuf.Timestamp createdAt = 2;
   google.protobuf.Timestamp lastVisit = 3;
   bool verified = 4;
   string avatarUrl = 5;
@@ -59,7 +59,7 @@ message GetByCredsResponse {
   bytes id = 1;
   string username = 2;
   string email = 3;
-  google.protobuf.Timestamp joinedIn = 4;
+  google.protobuf.Timestamp createdAt = 4;
   google.protobuf.Timestamp lastVisit = 5;
   bool verified = 6;
   string avatarUrl = 7;

@@ -76,7 +76,7 @@ func (h *UserHandler) GetByID(ctx context.Context, input *types.UUID) (*pb.User,
 
 	return &pb.User{
 		Username:  user.Username,
-		JoinedIn:  timestamppb.New(user.JoinedIn),
+		CreatedAt: timestamppb.New(user.CreatedAt),
 		LastVisit: timestamppb.New(user.LastVisit),
 		Verified:  user.Verified,
 		AvatarUrl: "", // TODO: Fix this
@@ -95,7 +95,7 @@ func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsReques
 		Id:        user.ID.Bytes(),
 		Username:  user.Username,
 		Email:     user.Email,
-		JoinedIn:  timestamppb.New(user.JoinedIn),
+		CreatedAt: timestamppb.New(user.CreatedAt),
 		LastVisit: timestamppb.New(user.LastVisit),
 		Verified:  user.Verified,
 		AvatarUrl: "", // TODO: Fix this

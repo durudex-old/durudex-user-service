@@ -121,16 +121,16 @@ func TestUserRepository_GetByID(t *testing.T) {
 			args: args{id: uuid.UUID{}},
 			want: domain.User{
 				Username:  "example",
-				JoinedIn:  time.Now(),
+				CreatedAt: time.Now(),
 				LastVisit: time.Now(),
 				Verified:  true,
 				AvatarURL: nil,
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"username", "joined_in", "last_visit", "verified", "avatar_url",
+					"username", "created_at", "last_visit", "verified", "avatar_url",
 				}).AddRow(
-					user.Username, user.JoinedIn, user.LastVisit, user.Verified, user.AvatarURL)
+					user.Username, user.CreatedAt, user.LastVisit, user.Verified, user.AvatarURL)
 
 				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
 					WithArgs(args.id).
@@ -192,17 +192,17 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 				Username:  "example",
 				Email:     "example@example.example",
 				Password:  "qwerty123",
-				JoinedIn:  time.Now(),
+				CreatedAt: time.Now(),
 				LastVisit: time.Now(),
 				Verified:  true,
 				AvatarURL: nil,
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"id", "email", "password", "joined_in", "last_visit",
+					"id", "email", "password", "created_at", "last_visit",
 					"verified", "avatar_url",
 				}).AddRow(
-					user.ID, user.Email, user.Password, user.JoinedIn,
+					user.ID, user.Email, user.Password, user.CreatedAt,
 					user.LastVisit, user.Verified, user.AvatarURL)
 
 				mock.ExpectQuery(`SELECT (.+) FROM "user"`).

@@ -36,7 +36,7 @@ type User struct {
 	Username  string
 	Email     string
 	Password  string
-	JoinedIn  time.Time
+	CreatedAt time.Time
 	LastVisit time.Time
 	Verified  bool
 	AvatarURL *string
