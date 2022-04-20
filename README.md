@@ -29,7 +29,7 @@ Service for working with users.
 1) Create an `.env` file in the root directory and add the following values from `.env.example`:
 ```env
 # Debug mode.
-DEBUG=true
+DEBUG=false
 
 # Config variables:
 CONFIG_PATH=configs/main
