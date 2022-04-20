@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb"
-	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb/types"
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/service"
 
@@ -43,7 +42,7 @@ func NewUserHandler(service service.User) *UserHandler {
 }
 
 // Create user handler.
-func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*types.UUID, error) {
+func (h *UserHandler) CreateUser(ctx context.Context, input *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	// Create user model
 	user := domain.User{
 		Username: input.Username,
@@ -54,60 +53,59 @@ func (h *UserHandler) Create(ctx context.Context, input *pb.CreateRequest) (*typ
 	// Creating a new user.
 	id, err := h.service.Create(ctx, user)
 	if err != nil {
-		return &types.UUID{}, status.Error(codes.Internal, err.Error())
+		return &pb.CreateUserResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &types.UUID{Value: id.Bytes()}, nil
+	return &pb.CreateUserResponse{Id: id.Bytes()}, nil
 }
 
 // Getting user by ID handler.
-func (h *UserHandler) GetByID(ctx context.Context, input *types.UUID) (*pb.User, error) {
+func (h *UserHandler) GetUserByID(ctx context.Context, input *pb.GetUserByIDRequest) (*pb.GetUserByIDResponse, error) {
 	// Get user uuid from bytes.
-	id, err := uuid.FromBytes(input.Value)
+	id, err := uuid.FromBytes(input.Id)
 	if err != nil {
-		return &pb.User{}, err
+		return &pb.GetUserByIDResponse{}, err
 	}
 
 	// Getting user by ID.
 	user, err := h.service.GetByID(ctx, id)
 	if err != nil {
-		return &pb.User{}, status.Error(codes.Internal, err.Error())
+		return &pb.GetUserByIDResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.User{
+	return &pb.GetUserByIDResponse{
 		Username:  user.Username,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		LastVisit: timestamppb.New(user.LastVisit),
 		Verified:  user.Verified,
-		AvatarUrl: "", // TODO: Fix this
+		AvatarUrl: user.AvatarURL,
 	}, nil
 }
 
 // Getting user by credentials handler.
-func (h *UserHandler) GetByCreds(ctx context.Context, input *pb.GetByCredsRequest) (*pb.GetByCredsResponse, error) {
+func (h *UserHandler) GetUserByCreds(ctx context.Context, input *pb.GetUserByCredsRequest) (*pb.GetUserByCredsResponse, error) {
 	// Getting user by credentials.
 	user, err := h.service.GetByCreds(ctx, input.Username, input.Password)
 	if err != nil {
-		return &pb.GetByCredsResponse{}, status.Error(codes.Internal, err.Error())
+		return &pb.GetUserByCredsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.GetByCredsResponse{
+	return &pb.GetUserByCredsResponse{
 		Id:        user.ID.Bytes(),
-		Username:  user.Username,
 		Email:     user.Email,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		LastVisit: timestamppb.New(user.LastVisit),
 		Verified:  user.Verified,
-		AvatarUrl: "", // TODO: Fix this
+		AvatarUrl: user.AvatarURL,
 	}, nil
 }
 
 // Forgot user password handler.
-func (h *UserHandler) ForgotPassword(ctx context.Context, input *pb.ForgotPasswordRequest) (*types.Status, error) {
-	userStatus, err := h.service.ForgotPassword(ctx, input.Password, input.Email)
+func (h *UserHandler) ForgotPassword(ctx context.Context, input *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+	err := h.service.ForgotPassword(ctx, input.Password, input.Email)
 	if err != nil {
-		return &types.Status{Status: userStatus}, status.Error(codes.Internal, err.Error())
+		return &pb.ForgotPasswordResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &types.Status{Status: userStatus}, nil
+	return &pb.ForgotPasswordResponse{}, nil
 }

@@ -33,7 +33,7 @@ type User interface {
 	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
 	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
-	ForgotPassword(ctx context.Context, password, email string) (bool, error)
+	ForgotPassword(ctx context.Context, password, email string) error
 }
 
 // User service structure.
@@ -98,22 +98,18 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 }
 
 // Forgot user password.
-func (s *UserService) ForgotPassword(ctx context.Context, password, email string) (bool, error) {
+func (s *UserService) ForgotPassword(ctx context.Context, password, email string) error {
 	// Check user password.
 	if !domain.RxPassword.MatchString(password) {
-		return false, domain.ErrPasswordIsIncorrect
+		return domain.ErrPasswordIsIncorrect
 	}
 
 	// Hashing input user password.
 	hashPassword, err := s.hash.Hash(password)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	// Forgot password.
-	if err := s.repos.ForgotPassword(ctx, hashPassword, email); err != nil {
-		return false, err
-	}
-
-	return true, nil
+	return s.repos.ForgotPassword(ctx, hashPassword, email)
 }
