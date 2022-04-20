@@ -41,7 +41,7 @@ func Run() {
 	// Initialize config.
 	cfg, err := config.Init()
 	if err != nil {
-		log.Error().Msgf("error initialize config: %s", err.Error())
+		log.Error().Err(err).Msg("error initialize config")
 	}
 
 	log.Debug().Msg("Creating connections to postgres database...")
@@ -67,9 +67,9 @@ func Run() {
 	grpcHandler := grpc.NewHandler(service)
 
 	// Create a new server.
-	srv, err := server.NewServer(cfg, grpcHandler)
+	srv, err := server.NewServer(&cfg.Server, grpcHandler)
 	if err != nil {
-		log.Fatal().Msgf("error creating a new server: %s", err.Error())
+		log.Fatal().Err(err).Msg("error creating a new server")
 	}
 
 	// Run server.

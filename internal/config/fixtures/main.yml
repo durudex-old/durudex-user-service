@@ -16,7 +16,11 @@
 grpc:
   host: user.service.durudex.local
   port: 8004
-  tls: true
+  tls:
+    enable: true
+    ca-cert: ./certs/rootCA.pem
+    cert: ./certs/sample.service.durudex.local-cert.pem
+    key: ./certs/sample.service.durudex.local-key.pem
 
 hash:
   password:

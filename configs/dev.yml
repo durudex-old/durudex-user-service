@@ -16,7 +16,11 @@
 server:
   host: user.service.durudex.local
   port: 8004
-  tls: false
+  tls:
+    enable: false
+    ca-cert: ./certs/rootCA.pem
+    cert: ./certs/user.service.durudex.local-cert.pem
+    key: ./certs/user.service.durudex.local-key.pem
 
 hash:
   password:

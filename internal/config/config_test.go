@@ -54,7 +54,12 @@ func TestConfig_Init(t *testing.T) {
 				Server: ServerConfig{
 					Host: defaultServerHost,
 					Port: defaultServerPort,
-					TLS:  defaultServerTLS,
+					TLS: TLSConfig{
+						Enable: defaultTLSEnable,
+						CACert: defaultTLSCACert,
+						Cert:   defaultTLSCert,
+						Key:    defaultTLSKey,
+					},
 				},
 				Database: DatabaseConfig{
 					Postgres: PostgresConfig{

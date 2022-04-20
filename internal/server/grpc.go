@@ -27,25 +27,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Certificates paths.
-const (
-	CACertFile          = "certs/rootCA.pem"
-	userserviceCertFile = "certs/user.service-cert.pem"
-	userserviceCertKey  = "certs/user.service-key.pem"
-)
+// gRPC server structure.
+type gRPCServer struct{ Server *grpc.Server }
 
-// Main structure of gRPC server.
-type GRPCServer struct {
-	Server *grpc.Server
-}
-
-// Creating a new gRPC server.
-func NewGRPCServer(cfg *config.Config) (*GRPCServer, error) {
+// Creating a new grpc server.
+func NewGRPC(cfg *config.TLSConfig) (*gRPCServer, error) {
 	serverOptions := []grpc.ServerOption{}
 
-	// If TLS is true.
-	if cfg.Server.TLS {
-		tlsCredentials, err := tls.LoadTLSCredentials(CACertFile, userserviceCertFile, userserviceCertKey)
+	if cfg.Enable {
+		creds, err := tls.LoadTLSCredentials(cfg.CACert, cfg.Cert, cfg.Key)
 		if err != nil {
 			return nil, err
 		}
@@ -53,12 +43,12 @@ func NewGRPCServer(cfg *config.Config) (*GRPCServer, error) {
 		// Append server options.
 		serverOptions = append(
 			serverOptions,
-			grpc.Creds(tlsCredentials),
+			grpc.Creds(creds),
 			grpc.UnaryInterceptor(unaryInterceptor),
 		)
 	}
 
-	return &GRPCServer{Server: grpc.NewServer(serverOptions...)}, nil
+	return &gRPCServer{Server: grpc.NewServer(serverOptions...)}, nil
 }
 
 // Unary gRPC interceptor.

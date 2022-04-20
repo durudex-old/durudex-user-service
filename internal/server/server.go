@@ -28,51 +28,47 @@ import (
 
 // The main structure of the server.
 type Server struct {
-	listener *net.Listener
-	grpc     *GRPCServer
+	listener net.Listener
+	grpc     *gRPCServer
 	handler  *grpc.Handler
 }
 
-// Create a new server.
-func NewServer(cfg *config.Config, handler *grpc.Handler) (*Server, error) {
-	// Server address.
-	address := cfg.Server.Host + ":" + cfg.Server.Port
+// Creating a new server.
+func NewServer(cfg *config.ServerConfig, handler *grpc.Handler) (*Server, error) {
+	log.Debug().Msg("Creating a new server...")
 
 	// Creating a new TCP connections.
-	lis, err := net.Listen("tcp", address)
+	lis, err := net.Listen("tcp", cfg.Host+":"+cfg.Port)
 	if err != nil {
 		return nil, err
 	}
 
 	// Creating a new gRPC server.
-	grpcServer, err := NewGRPCServer(cfg)
+	grpcServer, err := NewGRPC(&cfg.TLS)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Server{
-		listener: &lis,
-		grpc:     grpcServer,
-		handler:  handler,
-	}, nil
+	return &Server{listener: lis, grpc: grpcServer, handler: handler}, nil
 }
 
-// Run server.
+// Running server.
 func (s *Server) Run() {
-	log.Debug().Msg("Running server...")
+	log.Debug().Msg("Register gRPC handlers...")
 
 	// Register gRPC handlers.
 	s.handler.RegisterHandlers(s.grpc.Server)
 
-	// Running gRPC server.
-	if err := s.grpc.Server.Serve(*s.listener); err != nil {
-		log.Fatal().Msgf("error running server: %s", err.Error())
+	log.Info().Msg("Running server...")
+
+	if err := s.grpc.Server.Serve(s.listener); err != nil {
+		log.Fatal().Err(err).Msg("error running gRPC server")
 	}
 }
 
-// Stop server.
-func (srv *Server) Stop() {
+// Stopping server.
+func (s *Server) Stop() {
 	log.Info().Msg("Stoping gRPC server...")
 
-	srv.grpc.Server.Stop()
+	s.grpc.Server.Stop()
 }
