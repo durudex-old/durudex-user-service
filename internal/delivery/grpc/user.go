@@ -20,6 +20,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/durudex/dugopb/types/timestamp"
 	"github.com/durudex/durudex-user-service/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/service"
@@ -27,7 +28,6 @@ import (
 	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // User handler structure.
@@ -75,8 +75,8 @@ func (h *UserHandler) GetUserByID(ctx context.Context, input *pb.GetUserByIDRequ
 
 	return &pb.GetUserByIDResponse{
 		Username:  user.Username,
-		CreatedAt: timestamppb.New(user.CreatedAt),
-		LastVisit: timestamppb.New(user.LastVisit),
+		CreatedAt: timestamp.New(user.CreatedAt),
+		LastVisit: timestamp.New(user.LastVisit),
 		Verified:  user.Verified,
 		AvatarUrl: user.AvatarURL,
 	}, nil
@@ -93,8 +93,8 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *pb.GetUserByCre
 	return &pb.GetUserByCredsResponse{
 		Id:        user.ID.Bytes(),
 		Email:     user.Email,
-		CreatedAt: timestamppb.New(user.CreatedAt),
-		LastVisit: timestamppb.New(user.LastVisit),
+		CreatedAt: timestamp.New(user.CreatedAt),
+		LastVisit: timestamp.New(user.LastVisit),
 		Verified:  user.Verified,
 		AvatarUrl: user.AvatarURL,
 	}, nil

@@ -3,6 +3,7 @@ module github.com/durudex/durudex-user-service
 go 1.17
 
 require (
+	github.com/durudex/dugopb v0.0.0-20220425140104-bf229217bf34
 	github.com/durudex/dugopg v0.0.0-20220407211944-b92f95a089b6
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/pashagolub/pgxmock v1.4.0
@@ -10,7 +11,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	google.golang.org/grpc v1.43.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
