@@ -43,15 +43,12 @@ func NewUserHandler(service service.User) *UserHandler {
 
 // Create user handler.
 func (h *UserHandler) CreateUser(ctx context.Context, input *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	// Create user model
-	user := domain.User{
+	// Creating a new user.
+	id, err := h.service.Create(ctx, domain.User{
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
-	}
-
-	// Creating a new user.
-	id, err := h.service.Create(ctx, user)
+	})
 	if err != nil {
 		return &pb.CreateUserResponse{}, status.Error(codes.Internal, err.Error())
 	}
@@ -101,11 +98,26 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *pb.GetUserByCre
 }
 
 // Forgot user password handler.
-func (h *UserHandler) ForgotPassword(ctx context.Context, input *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+func (h *UserHandler) ForgotUserPassword(ctx context.Context, input *pb.ForgotUserPasswordRequest) (*pb.ForgotUserPasswordResponse, error) {
 	err := h.service.ForgotPassword(ctx, input.Password, input.Email)
 	if err != nil {
-		return &pb.ForgotPasswordResponse{}, status.Error(codes.Internal, err.Error())
+		return &pb.ForgotUserPasswordResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.ForgotPasswordResponse{}, nil
+	return &pb.ForgotUserPasswordResponse{}, nil
+}
+
+// Update user avatar handler.
+func (h *UserHandler) UpdateUserAvatar(ctx context.Context, input *pb.UpdateUserAvatarRequest) (*pb.UpdateUserAvatarResponse, error) {
+	return &pb.UpdateUserAvatarResponse{}, nil
+}
+
+// Creating user verification email code handler.
+func (h *UserHandler) CreateVerifyUserEmailCode(ctx context.Context, input *pb.CreateVerifyUserEmailCodeRequest) (*pb.CreateVerifyUserEmailCodeResponse, error) {
+	return &pb.CreateVerifyUserEmailCodeResponse{}, nil
+}
+
+// Verify user email handler.
+func (h *UserHandler) VerifyUserEmailCode(ctx context.Context, input *pb.VerifyUserEmailCodeRequest) (*pb.VerifyUserEmailCodeResponse, error) {
+	return &pb.VerifyUserEmailCodeResponse{}, nil
 }

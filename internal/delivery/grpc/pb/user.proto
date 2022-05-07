@@ -27,7 +27,10 @@ service UserService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse);
   rpc GetUserByCreds(GetUserByCredsRequest) returns (GetUserByCredsResponse);
-  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ForgotUserPassword(ForgotUserPasswordRequest) returns (ForgotUserPasswordResponse);
+  rpc UpdateUserAvatar(UpdateUserAvatarRequest) returns (UpdateUserAvatarResponse);
+  rpc CreateVerifyUserEmailCode(CreateVerifyUserEmailCodeRequest) returns (CreateVerifyUserEmailCodeResponse);
+  rpc VerifyUserEmailCode(VerifyUserEmailCodeRequest) returns (VerifyUserEmailCodeResponse);
 }
 
 message CreateUserRequest {
@@ -66,9 +69,31 @@ message GetUserByCredsResponse {
   optional string avatar_url = 6;
 }
 
-message ForgotPasswordRequest {
+message ForgotUserPasswordRequest {
   string email = 1;
   string password = 2;
 }
 
-message ForgotPasswordResponse {}
+message ForgotUserPasswordResponse {}
+
+message UpdateUserAvatarRequest {
+  bytes id = 1;
+  string avatar_url = 2;
+}
+
+message UpdateUserAvatarResponse {}
+
+message CreateVerifyUserEmailCodeRequest {
+  string email = 1;
+}
+
+message CreateVerifyUserEmailCodeResponse {}
+
+message VerifyUserEmailCodeRequest {
+  string email = 1;
+  string code = 2;
+}
+
+message VerifyUserEmailCodeResponse {
+  bool status = 1;
+}
