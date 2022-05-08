@@ -34,6 +34,7 @@ type User interface {
 	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
+	UpdateAvatar(ctx context.Context, id uuid.UUID, avatar string) error
 }
 
 // User service structure.
@@ -112,4 +113,8 @@ func (s *UserService) ForgotPassword(ctx context.Context, password, email string
 
 	// Forgot password.
 	return s.repos.ForgotPassword(ctx, hashPassword, email)
+}
+
+func (s *UserService) UpdateAvatar(ctx context.Context, id uuid.UUID, avatar string) error {
+	return nil
 }

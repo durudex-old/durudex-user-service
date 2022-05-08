@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,21 +17,26 @@
 
 package service
 
-import (
-	"github.com/durudex/durudex-user-service/internal/repository"
-	"github.com/durudex/durudex-user-service/pkg/hash"
-)
+import "context"
 
-// Service structure.
-type Service struct {
-	User
-	Code
+// Code service interface.
+type Code interface {
+	CreateVerifyEmailCode(ctx context.Context, email string) error
+	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
 }
 
-// Creating a new service.
-func NewService(repos *repository.Repository, hash *hash.Hash) *Service {
-	return &Service{
-		User: NewUserService(repos.User, hash.Password),
-		Code: NewCodeService(),
-	}
+// Code service structure.
+type CodeService struct{}
+
+// Creating a new code service.
+func NewCodeService() *CodeService {
+	return &CodeService{}
+}
+
+func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) error {
+	return nil
+}
+
+func (s *CodeService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
+	return false, nil
 }

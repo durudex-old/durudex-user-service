@@ -91,7 +91,7 @@ message CreateVerifyUserEmailCodeResponse {}
 
 message VerifyUserEmailCodeRequest {
   string email = 1;
-  string code = 2;
+  uint64 code = 2;
 }
 
 message VerifyUserEmailCodeResponse {
