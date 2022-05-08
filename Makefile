@@ -35,13 +35,17 @@ lint:
 test: lint
 	go test -v ./...
 
+.PHONY: migrate-create
+migrate-create:
+	migrate create -ext sql -dir ./schema -seq durudex
+
 .PHONY: migrate-up
 migrate-up:
-	migrate -path ./schema/migrations -database '$(POSTGRES_URL)?sslmode=disable' up
+	migrate -path ./schema -database '$(POSTGRES_URL)?sslmode=disable' up
 
 .PHONY: migrate-down
 migrate-down:
-	migrate -path ./schema/migrations -database '$(POSTGRES_URL)?sslmode=disable' down
+	migrate -path ./schema -database '$(POSTGRES_URL)?sslmode=disable' down
 
 .PHONY: protoc
 protoc:
@@ -51,12 +55,5 @@ protoc:
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
 		internal/delivery/grpc/pb/*.proto
-
-.PHONY: protoc-types
-protoc-types:
-	protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		internal/delivery/grpc/pb/types/*.proto
 
 .DEFAULT_GOAL := run
