@@ -106,3 +106,12 @@ func (r *UserRepository) ForgotPassword(ctx context.Context, password, email str
 
 	return err
 }
+
+// Update user avatar in postgres database.
+func (r *UserRepository) UpdateAvatar(ctx context.Context, avatarUrl string, id uuid.UUID) error {
+	// Query to update user avatar.
+	query := fmt.Sprintf(`UPDATE "%s" SET "avatar_url"=$1 WHERE "id"=$2`, userTable)
+	_, err := r.psql.Exec(ctx, query, avatarUrl, id)
+
+	return err
+}

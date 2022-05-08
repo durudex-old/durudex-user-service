@@ -19,6 +19,7 @@ package psql
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -64,7 +65,7 @@ func TestUserRepository_Create(t *testing.T) {
 			}},
 			want: uuid.UUID{},
 			mockBehavior: func(args args, want uuid.UUID) {
-				mock.ExpectQuery(`INSERT INTO "user"`).
+				mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, userTable)).
 					WithArgs(args.user.Username, args.user.Email, args.user.Password).
 					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want))
 			},
@@ -132,7 +133,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 				}).AddRow(
 					user.Username, user.CreatedAt, user.LastVisit, user.Verified, user.AvatarURL)
 
-				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
+				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, userTable)).
 					WithArgs(args.id).
 					WillReturnRows(rows)
 			},
@@ -205,7 +206,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 					user.ID, user.Email, user.Password, user.CreatedAt,
 					user.LastVisit, user.Verified, user.AvatarURL)
 
-				mock.ExpectQuery(`SELECT (.+) FROM "user"`).
+				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, userTable)).
 					WithArgs(args.username).
 					WillReturnRows(rows)
 			},
@@ -260,7 +261,7 @@ func TestUserRepository_ForgotPassword(t *testing.T) {
 			name: "OK",
 			args: args{email: "example@example.example", password: "qwerty"},
 			mockBehavior: func(args args) {
-				mock.ExpectExec(`UPDATE "user"`).
+				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, userTable)).
 					WithArgs(args.password, args.email).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
@@ -276,6 +277,62 @@ func TestUserRepository_ForgotPassword(t *testing.T) {
 			err := repos.ForgotPassword(context.Background(), tt.args.password, tt.args.email)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error forgot user password: %s", err.Error())
+			}
+		})
+	}
+}
+
+// Testing update user in postgres database.
+func TestUserRepository_UpdateAvatar(t *testing.T) {
+	// Creating a new mock connection.
+	mock, err := pgxmock.NewConn()
+	if err != nil {
+		t.Fatalf("error creating a new mock connection: %s", err.Error())
+	}
+	defer mock.Close(context.Background())
+
+	// Testing args.
+	type args struct {
+		avatarUrl string
+		id        uuid.UUID
+	}
+
+	// Test bahavior.
+	type mockBehavior func(args args)
+
+	// Creating a new repository.
+	repos := NewUserRepository(mock)
+
+	// Tests structures.
+	tests := []struct {
+		name         string
+		args         args
+		wantErr      bool
+		mockBehavior mockBehavior
+	}{
+		{
+			name: "OK",
+			args: args{
+				avatarUrl: "https://cdn.durudex.com/avatar/a6d84129-d957-4c4d-9935-236d660bdd42/user.png",
+				id:        uuid.UUID{},
+			},
+			mockBehavior: func(args args) {
+				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, userTable)).
+					WithArgs(args.avatarUrl, args.id).
+					WillReturnResult(pgxmock.NewResult("", 1))
+			},
+		},
+	}
+
+	// Conducting tests in various structures.
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior(tt.args)
+
+			// Update user avatar in postgres database.
+			err := repos.UpdateAvatar(context.Background(), tt.args.avatarUrl, tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error updating user avatar: %s", err.Error())
 			}
 		})
 	}

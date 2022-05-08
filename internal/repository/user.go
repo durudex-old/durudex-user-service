@@ -33,6 +33,7 @@ type User interface {
 	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
+	UpdateAvatar(ctx context.Context, avatarUrl string, id uuid.UUID) error
 }
 
 // User repository structure.
@@ -61,4 +62,9 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 // Forgot user password in database.
 func (r *UserRepository) ForgotPassword(ctx context.Context, email, password string) error {
 	return r.psql.ForgotPassword(ctx, password, email)
+}
+
+// Update user avatar in database.
+func (r *UserRepository) UpdateAvatar(ctx context.Context, avatarUrl string, id uuid.UUID) error {
+	return r.psql.UpdateAvatar(ctx, avatarUrl, id)
 }
