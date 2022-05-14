@@ -22,7 +22,7 @@ import (
 	"errors"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
-	"github.com/durudex/durudex-user-service/internal/repository"
+	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 	"github.com/durudex/durudex-user-service/pkg/hash"
 
 	"github.com/gofrs/uuid"
@@ -39,12 +39,12 @@ type User interface {
 
 // User service structure.
 type UserService struct {
-	repos repository.User
+	repos postgres.User
 	hash  hash.Password
 }
 
 // Creating a new user service.
-func NewUserService(repos repository.User, hash hash.Password) *UserService {
+func NewUserService(repos postgres.User, hash hash.Password) *UserService {
 	return &UserService{repos: repos, hash: hash}
 }
 

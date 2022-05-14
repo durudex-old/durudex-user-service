@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,31 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package repository
+package postgres
 
 import (
 	"github.com/durudex/durudex-user-service/internal/config"
-	"github.com/durudex/durudex-user-service/internal/repository/postgres"
+	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+
+	"github.com/rs/zerolog/log"
 )
 
-// Repository structure.
-type Repository struct{ Postgres *postgres.PostgresRepository }
+// Postgres repository structure.
+type PostgresRepository struct{ User }
 
-// Creating a new repository.
-func NewRepository(config config.DatabaseConfig) *Repository {
-	return &Repository{Postgres: postgres.NewPostgresRepository(config.Postgres)}
+// Creating a new postgres repository.
+func NewPostgresRepository(cfg config.PostgresConfig) *PostgresRepository {
+	log.Debug().Msg("Creating a new postgres repository")
+
+	// Creating a new postgres pool connection.
+	client, err := postgres.NewPool(&postgres.PostgresConfig{
+		URL:      cfg.URL,
+		MaxConns: cfg.MaxConns,
+		MinConns: cfg.MinConns,
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create postgres client")
+	}
+
+	return &PostgresRepository{User: NewUserRepository(client)}
 }

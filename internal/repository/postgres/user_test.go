@@ -15,7 +15,7 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package psql
+package postgres_test
 
 import (
 	"context"
@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 
 	"github.com/gofrs/uuid"
 	"github.com/pashagolub/pgxmock"
@@ -46,7 +47,7 @@ func TestUserRepository_Create(t *testing.T) {
 	type mockBehavior func(args args, id uuid.UUID)
 
 	// Creating a new repository.
-	repos := NewUserRepository(mock)
+	repos := postgres.NewUserRepository(mock)
 
 	// Tests structures.
 	tests := []struct {
@@ -65,7 +66,7 @@ func TestUserRepository_Create(t *testing.T) {
 			}},
 			want: uuid.UUID{},
 			mockBehavior: func(args args, want uuid.UUID) {
-				mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, userTable)).
+				mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, postgres.UserTable)).
 					WithArgs(args.user.Username, args.user.Email, args.user.Password).
 					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want))
 			},
@@ -107,7 +108,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 	type mockBehavior func(args args, user domain.User)
 
 	// Creating a new repository.
-	repos := NewUserRepository(mock)
+	repos := postgres.NewUserRepository(mock)
 
 	// Tests structures.
 	tests := []struct {
@@ -133,7 +134,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 				}).AddRow(
 					user.Username, user.CreatedAt, user.LastVisit, user.Verified, user.AvatarURL)
 
-				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, userTable)).
+				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
 					WithArgs(args.id).
 					WillReturnRows(rows)
 			},
@@ -175,7 +176,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 	type mockBehavior func(args args, user domain.User)
 
 	// Creating a new repository.
-	repos := NewUserRepository(mock)
+	repos := postgres.NewUserRepository(mock)
 
 	// Tests structures.
 	tests := []struct {
@@ -206,7 +207,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 					user.ID, user.Email, user.Password, user.CreatedAt,
 					user.LastVisit, user.Verified, user.AvatarURL)
 
-				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, userTable)).
+				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
 					WithArgs(args.username).
 					WillReturnRows(rows)
 			},
@@ -248,7 +249,7 @@ func TestUserRepository_ForgotPassword(t *testing.T) {
 	type mockBehavior func(args args)
 
 	// Creating a new repository.
-	repos := NewUserRepository(mock)
+	repos := postgres.NewUserRepository(mock)
 
 	// Tests structures.
 	tests := []struct {
@@ -261,7 +262,7 @@ func TestUserRepository_ForgotPassword(t *testing.T) {
 			name: "OK",
 			args: args{email: "example@example.example", password: "qwerty"},
 			mockBehavior: func(args args) {
-				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, userTable)).
+				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
 					WithArgs(args.password, args.email).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
@@ -301,7 +302,7 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 	type mockBehavior func(args args)
 
 	// Creating a new repository.
-	repos := NewUserRepository(mock)
+	repos := postgres.NewUserRepository(mock)
 
 	// Tests structures.
 	tests := []struct {
@@ -317,7 +318,7 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 				id:        uuid.UUID{},
 			},
 			mockBehavior: func(args args) {
-				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, userTable)).
+				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
 					WithArgs(args.avatarUrl, args.id).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},

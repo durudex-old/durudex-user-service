@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,26 +15,35 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package psql
+package postgres
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/durudex/dugopg"
 	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/pkg/database/postgres"
 
 	"github.com/gofrs/uuid"
 )
 
-// User database tables.
-const userTable string = "user"
+// User table name.
+const UserTable string = "sample"
 
-// User postgres repository structure.
-type UserRepository struct{ psql dugopg.Native }
+// User repository interface.
+type User interface {
+	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
+	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
+	GetByUsername(ctx context.Context, username string) (domain.User, error)
+	ForgotPassword(ctx context.Context, password, email string) error
+	UpdateAvatar(ctx context.Context, avatarUrl string, id uuid.UUID) error
+}
 
-// Creating a new user postgres repository.
-func NewUserRepository(psql dugopg.Native) *UserRepository {
+// User repository structure.
+type UserRepository struct{ psql postgres.Postgres }
+
+// Creating a new user repository.
+func NewUserRepository(psql postgres.Postgres) *UserRepository {
 	return &UserRepository{psql: psql}
 }
 
@@ -44,9 +53,9 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUI
 
 	// Query to create user.
 	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3)
-		RETURNING "id"`, userTable)
+		RETURNING "id"`, UserTable)
 
-	// Query and get id.
+	// Query and get user uuid.
 	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
 		return uuid.UUID{}, err
@@ -63,7 +72,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User
 
 	// Query for get user by id.
 	query := fmt.Sprintf(`SELECT "username", "created_at", "last_visit", "verified", "avatar_url"
-		FROM "%s" WHERE "id"=$1`, userTable)
+		FROM "%s" WHERE "id"=$1`, UserTable)
 
 	row := r.psql.QueryRow(ctx, query, id)
 
@@ -84,7 +93,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 
 	// Query for get user by username.
 	query := fmt.Sprintf(`SELECT "id", "email", "password", "created_at", "last_visit", "verified",
-	"avatar_url" FROM "%s" WHERE username=$1`, userTable)
+	"avatar_url" FROM "%s" WHERE username=$1`, UserTable)
 
 	row := r.psql.QueryRow(ctx, query, username)
 
@@ -101,7 +110,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 // Forgot password in postgres database.
 func (r *UserRepository) ForgotPassword(ctx context.Context, password, email string) error {
 	// Query to update user password.
-	query := fmt.Sprintf(`UPDATE "%s" SET password=$1 WHERE email=$2`, userTable)
+	query := fmt.Sprintf(`UPDATE "%s" SET password=$1 WHERE email=$2`, UserTable)
 	_, err := r.psql.Exec(ctx, query, password, email)
 
 	return err
@@ -110,7 +119,7 @@ func (r *UserRepository) ForgotPassword(ctx context.Context, password, email str
 // Update user avatar in postgres database.
 func (r *UserRepository) UpdateAvatar(ctx context.Context, avatarUrl string, id uuid.UUID) error {
 	// Query to update user avatar.
-	query := fmt.Sprintf(`UPDATE "%s" SET "avatar_url"=$1 WHERE "id"=$2`, userTable)
+	query := fmt.Sprintf(`UPDATE "%s" SET "avatar_url"=$1 WHERE "id"=$2`, UserTable)
 	_, err := r.psql.Exec(ctx, query, avatarUrl, id)
 
 	return err

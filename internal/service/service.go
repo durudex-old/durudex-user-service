@@ -31,7 +31,7 @@ type Service struct {
 // Creating a new service.
 func NewService(repos *repository.Repository, hash *hash.Hash) *Service {
 	return &Service{
-		User: NewUserService(repos.User, hash.Password),
+		User: NewUserService(repos.Postgres, hash.Password),
 		Code: NewCodeService(),
 	}
 }
