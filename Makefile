@@ -47,13 +47,12 @@ migrate-up:
 migrate-down:
 	migrate -path ./schema -database '$(POSTGRES_URL)?sslmode=disable' down
 
-.PHONY: protoc
-protoc:
-	protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=. \
-		--go-grpc_opt=paths=source_relative \
-		internal/delivery/grpc/pb/*.proto
+.PHONY: buf
+buf:
+	buf generate proto/src/api --path proto/src/api/durudex/v1/user.proto
+
+.PHONY: buf-lint
+buf-lint:
+	buf lint proto/src/durudex/v1/user.proto
 
 .DEFAULT_GOAL := run

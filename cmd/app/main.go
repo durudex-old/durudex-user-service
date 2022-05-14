@@ -17,10 +17,6 @@
 
 package main
 
-import "github.com/durudex/durudex-user-service/internal/app"
-
-// The main function that is called when running the application.
 func main() {
-	// Running a this application.
-	app.Run()
+
 }

@@ -3,7 +3,7 @@ module github.com/durudex/durudex-user-service
 go 1.17
 
 require (
-	github.com/durudex/dugopb v0.0.0-20220425140104-bf229217bf34
+	github.com/durudex/dugopb v0.0.0-20220510164815-ab4ab3c8f7c8
 	github.com/durudex/dugopg v0.0.0-20220407211944-b92f95a089b6
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/pashagolub/pgxmock v1.4.0
