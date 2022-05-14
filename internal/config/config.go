@@ -19,22 +19,25 @@ package config
 
 import (
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
+// Default config path.
+const defaultConfigPath string = "configs/main"
+
 type (
 	// Config variables.
 	Config struct {
-		Server   ServerConfig   // Server config.
-		Database DatabaseConfig // Database config.
-		Hash     HashConfig     // Hash config.
+		GRPC     GRPCConfig
+		Database DatabaseConfig
+		Hash     HashConfig
 	}
 
-	// Server config variables.
-	ServerConfig struct {
+	// gRPC server config variables.
+	GRPCConfig struct {
 		Host string    `mapstructure:"host"`
 		Port string    `mapstructure:"port"`
 		TLS  TLSConfig `mapstructure:"tls"`
@@ -75,9 +78,6 @@ type (
 func Init() (*Config, error) {
 	log.Debug().Msg("Initialize config...")
 
-	// Populate defaults config variables.
-	populateDefaults()
-
 	// Parsing specified when starting the config file.
 	if err := parseConfigFile(); err != nil {
 		return nil, err
@@ -109,10 +109,10 @@ func parseConfigFile() error {
 	log.Debug().Msgf("Parsing config file: %s", configPath)
 
 	// Split path to folder and file.
-	path := strings.Split(configPath, "/")
+	dir, file := filepath.Split(configPath)
 
-	viper.AddConfigPath(path[0]) // Folder.
-	viper.SetConfigName(path[1]) // File.
+	viper.AddConfigPath(dir)
+	viper.SetConfigName(file)
 
 	// Read config file.
 	return viper.ReadInConfig()
@@ -131,7 +131,7 @@ func unmarshal(cfg *Config) error {
 		return err
 	}
 	// Unmarshal server keys.
-	return viper.UnmarshalKey("server", &cfg.Server)
+	return viper.UnmarshalKey("grpc", &cfg.GRPC)
 }
 
 // Set configurations from environment.

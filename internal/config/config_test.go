@@ -51,24 +51,24 @@ func TestConfig_Init(t *testing.T) {
 				postgresURL: "postgres://localhost:1",
 			}},
 			want: &Config{
-				Server: ServerConfig{
-					Host: defaultServerHost,
-					Port: defaultServerPort,
+				GRPC: GRPCConfig{
+					Host: "user.service.durudex.local",
+					Port: "8004",
 					TLS: TLSConfig{
-						Enable: defaultTLSEnable,
-						CACert: defaultTLSCACert,
-						Cert:   defaultTLSCert,
-						Key:    defaultTLSKey,
+						Enable: true,
+						CACert: "./certs/rootCA.pem",
+						Cert:   "./certs/sample.service.durudex.local-cert.pem",
+						Key:    "./certs/sample.service.durudex.local-key.pem",
 					},
 				},
 				Database: DatabaseConfig{
 					Postgres: PostgresConfig{
-						MaxConns: defaultPostgresMaxConns,
-						MinConns: defaultPostgresMinConns,
+						MaxConns: 20,
+						MinConns: 5,
 						URL:      "postgres://localhost:1",
 					},
 				},
-				Hash: HashConfig{Password: PasswordConfig{Cost: defaultPasswordCost}},
+				Hash: HashConfig{Password: PasswordConfig{Cost: 14}},
 			},
 		},
 	}

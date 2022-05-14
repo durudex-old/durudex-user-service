@@ -14,13 +14,13 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>
 
 grpc:
-  host: user.service.durudex.local
+  host: "user.service.durudex.local"
   port: 8004
   tls:
     enable: true
-    ca-cert: ./certs/rootCA.pem
-    cert: ./certs/sample.service.durudex.local-cert.pem
-    key: ./certs/sample.service.durudex.local-key.pem
+    ca-cert: "./certs/rootCA.pem"
+    cert: "./certs/sample.service.durudex.local-cert.pem"
+    key: "./certs/sample.service.durudex.local-key.pem"
 
 hash:
   password:

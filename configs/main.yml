@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>
 
-server:
-  host: user.service.durudex.local
+grpc:
+  host: "user.service.durudex.local"
   port: 8004
   tls:
     enable: true
-    ca-cert: ./certs/rootCA.pem
-    cert: ./certs/user.service.durudex.local-cert.pem
-    key: ./certs/user.service.durudex.local-key.pem
+    ca-cert: "./certs/rootCA.pem"
+    cert: "./certs/user.service.durudex.local-cert.pem"
+    key: "./certs/user.service.durudex.local-key.pem"
 
 hash:
   password:
