@@ -18,13 +18,15 @@
 package redis
 
 import (
-	"github.com/go-redis/redis"
+	"context"
+
+	"github.com/go-redis/redis/v8"
 )
 
 // Redis driver interface.
 type Redis redis.Cmdable
 
-// Creating a new Redis client.
+// Creating a new redis client.
 func NewClient(url string) (Redis, error) {
 	// Parsing redis url.
 	opt, err := redis.ParseURL(url)
@@ -36,7 +38,7 @@ func NewClient(url string) (Redis, error) {
 	conn := redis.NewClient(opt)
 
 	// Check for connections operation.
-	if err := conn.Ping().Err(); err != nil {
+	if err := conn.Ping(context.Background()).Err(); err != nil {
 		return nil, err
 	}
 

@@ -19,6 +19,8 @@ package redis
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/durudex/durudex-user-service/pkg/database/redis"
 )
@@ -28,7 +30,7 @@ const EmailCodeModule string = "emailcode"
 
 // Code repository interface.
 type Code interface {
-	CreateByEmail(ctx context.Context, email string, code uint64) error
+	CreateByEmail(ctx context.Context, email string, code uint64, ttl time.Duration) error
 	GetByEmail(ctx context.Context, email string) (uint64, error)
 }
 
@@ -40,10 +42,16 @@ func NewCodeRepository(redis redis.Redis) *CodeRepository {
 	return &CodeRepository{redis: redis}
 }
 
-func (r *CodeRepository) CreateByEmail(ctx context.Context, email string, code uint64) error {
-	return nil
+// Creating a new user verification email code.
+func (r *CodeRepository) CreateByEmail(ctx context.Context, email string, code uint64, ttl time.Duration) error {
+	key := fmt.Sprintf("%s:%s", EmailCodeModule, email)
+
+	return r.redis.SetEX(ctx, key, code, ttl).Err()
 }
 
+// Getting a user verification email code.
 func (r *CodeRepository) GetByEmail(ctx context.Context, email string) (uint64, error) {
-	return 0, nil
+	key := fmt.Sprintf("%s:%s", EmailCodeModule, email)
+
+	return r.redis.Get(ctx, key).Uint64()
 }
