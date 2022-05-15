@@ -23,6 +23,7 @@ import (
 
 	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/repository/redis"
+	"github.com/durudex/durudex-user-service/pkg/crypto/rand"
 )
 
 // Code service interface.
@@ -44,7 +45,12 @@ func NewCodeService(repos redis.Code, config config.CodeConfig) *CodeService {
 
 // Creating a new user verification email code.
 func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) error {
-	var code uint64 = 1 // TODO: generate code.
+	// Generate random code.
+	code, err := rand.Generate(s.config.MaxLength, s.config.MinLength)
+	if err != nil {
+		return err
+	}
+
 	return s.repos.CreateByEmail(ctx, email, code, s.config.TTL)
 }
 

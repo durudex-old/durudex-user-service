@@ -73,7 +73,11 @@ func TestConfig_Init(t *testing.T) {
 					Redis: RedisConfig{URL: "redis://user.redis.durudex.local:6379"},
 				},
 				Password: PasswordConfig{Cost: 14},
-				Code:     CodeConfig{TTL: time.Minute * 15},
+				Code: CodeConfig{
+					TTL:       time.Minute * 15,
+					MaxLength: 999999,
+					MinLength: 100000,
+				},
 			},
 		},
 	}

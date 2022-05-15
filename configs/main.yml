@@ -32,3 +32,5 @@ password:
 
 code:
   ttl: "15m"
+  max-length: 999999
+  min-length: 100000

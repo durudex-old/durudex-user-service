@@ -60,7 +60,9 @@ type (
 
 	// Code config variables.
 	CodeConfig struct {
-		TTL time.Duration `mapstructure:"ttl"`
+		TTL       time.Duration `mapstructure:"ttl"`
+		MaxLength int64         `mapstructure:"max-length"`
+		MinLength int64         `mapstructure:"min-length"`
 	}
 
 	// Database config variables.
