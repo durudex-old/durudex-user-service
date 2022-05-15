@@ -18,6 +18,7 @@
 package service
 
 import (
+	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/repository"
 	"github.com/durudex/durudex-user-service/pkg/hash"
 )
@@ -29,9 +30,9 @@ type Service struct {
 }
 
 // Creating a new service.
-func NewService(repos *repository.Repository, hash *hash.Hash) *Service {
+func NewService(repos *repository.Repository, hash *hash.Hash, config *config.Config) *Service {
 	return &Service{
 		User: NewUserService(repos.Postgres, hash.Password),
-		Code: NewCodeService(),
+		Code: NewCodeService(repos.Redis, config.Code),
 	}
 }

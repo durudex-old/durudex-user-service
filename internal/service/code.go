@@ -17,26 +17,49 @@
 
 package service
 
-import "context"
+import (
+	"context"
+	"errors"
+
+	"github.com/durudex/durudex-user-service/internal/config"
+	"github.com/durudex/durudex-user-service/internal/repository/redis"
+)
 
 // Code service interface.
 type Code interface {
 	CreateVerifyEmailCode(ctx context.Context, email string) error
-	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
+	VerifyEmailCode(ctx context.Context, email string, input uint64) (bool, error)
 }
 
 // Code service structure.
-type CodeService struct{}
+type CodeService struct {
+	repos  redis.Code
+	config config.CodeConfig
+}
 
 // Creating a new code service.
-func NewCodeService() *CodeService {
-	return &CodeService{}
+func NewCodeService(repos redis.Code, config config.CodeConfig) *CodeService {
+	return &CodeService{repos: repos, config: config}
 }
 
+// Creating a new user verification email code.
 func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) error {
-	return nil
+	var code uint64 = 1 // TODO: generate code.
+	return s.repos.CreateByEmail(ctx, email, code, s.config.TTL)
 }
 
-func (s *CodeService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
-	return false, nil
+// Verifying a user verification email code.
+func (s *CodeService) VerifyEmailCode(ctx context.Context, email string, input uint64) (bool, error) {
+	// Getting code by email.
+	code, err := s.repos.GetByEmail(ctx, email)
+	if err != nil {
+		return false, err
+	}
+
+	// Check input code.
+	if input != code {
+		return false, errors.New("invalid code")
+	}
+
+	return true, nil
 }

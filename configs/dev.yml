@@ -22,11 +22,13 @@ grpc:
     cert: "./certs/user.service.durudex.local-cert.pem"
     key: "./certs/user.service.durudex.local-key.pem"
 
-hash:
-  password:
-    cost: 14
-
 database:
   postgres:
     max-conns: 5
     min-conns: 2
+
+password:
+  cost: 14
+
+code:
+  ttl: "1h"

@@ -20,6 +20,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -33,7 +34,8 @@ type (
 	Config struct {
 		GRPC     GRPCConfig
 		Database DatabaseConfig
-		Hash     HashConfig
+		Password PasswordConfig
+		Code     CodeConfig
 	}
 
 	// gRPC server config variables.
@@ -51,14 +53,14 @@ type (
 		Key    string `mapstructure:"key"`
 	}
 
-	// Hash config variables.
-	HashConfig struct {
-		Password PasswordConfig `mapstructure:"password"`
-	}
-
 	// Password config variables.
 	PasswordConfig struct {
 		Cost int `mapstructure:"cost"`
+	}
+
+	// Code config variables.
+	CodeConfig struct {
+		TTL time.Duration `mapstructure:"ttl"`
 	}
 
 	// Database config variables.
@@ -127,7 +129,11 @@ func unmarshal(cfg *Config) error {
 	log.Debug().Msg("Unmarshal config keys...")
 
 	// Unmarshal password keys.
-	if err := viper.UnmarshalKey("hash", &cfg.Hash); err != nil {
+	if err := viper.UnmarshalKey("password", &cfg.Password); err != nil {
+		return err
+	}
+	// Unmarshal code keys.
+	if err := viper.UnmarshalKey("code", &cfg.Code); err != nil {
 		return err
 	}
 	// Unmarshal postgres database keys.

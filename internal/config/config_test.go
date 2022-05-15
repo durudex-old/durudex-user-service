@@ -21,6 +21,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 // Test initialize config.
@@ -71,7 +72,8 @@ func TestConfig_Init(t *testing.T) {
 					},
 					Redis: RedisConfig{URL: "redis://user.redis.durudex.local:6379"},
 				},
-				Hash: HashConfig{Password: PasswordConfig{Cost: 14}},
+				Password: PasswordConfig{Cost: 14},
+				Code:     CodeConfig{TTL: time.Minute * 15},
 			},
 		},
 	}
