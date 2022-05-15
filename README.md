@@ -36,6 +36,9 @@ CONFIG_PATH=configs/main
 
 # Postgres database variables:
 POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5432/durudex
+
+# Redis database variables:
+REDIS_URL=redis://user.redis.durudex.local:6379
 ```
 2) Generate certificates, information can be found at [certs/README.md](certs/README.md)
 3) Migrate the database using `make migrate-up`.
@@ -52,14 +55,3 @@ If you want to say thank you and/or support the active development of [Durudex](
 
 ## ⚠️ License
 Copyright © 2021-2022 [Durudex](https://github.com/durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
-
-#### Third-party library licenses
-+ [grpc-go](https://github.com/grpc/grpc-go/blob/master/LICENSE)
-+ [protobuf](https://github.com/protocolbuffers/protobuf/blob/master/LICENSE)
-+ [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
-+ [viper](https://github.com/spf13/viper/blob/master/LICENSE)
-+ [dugopg](https://github.com/durudex/dugopg/blob/master/LICENSE)
-+ [crypto](https://github.com/golang/crypto/blob/master/LICENSE)
-+ [pgxmock](https://github.com/pashagolub/pgxmock/blob/master/LICENSE)
-+ [uuid](https://github.com/gofrs/uuid/blob/master/LICENSE)
-+ [dugopb](https://github.com/durudex/dugopb/blob/main/LICENSE)

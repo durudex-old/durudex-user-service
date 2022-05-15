@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,27 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package repository
+package redis
 
 import (
 	"github.com/durudex/durudex-user-service/internal/config"
-	"github.com/durudex/durudex-user-service/internal/repository/postgres"
-	"github.com/durudex/durudex-user-service/internal/repository/redis"
+	"github.com/durudex/durudex-user-service/pkg/database/redis"
+
+	"github.com/rs/zerolog/log"
 )
 
-// Repository structure.
-type Repository struct {
-	Postgres *postgres.PostgresRepository
-	Redis    *redis.RedisRepository
-}
+// Redis repository structure.
+type RedisRepository struct{ Code }
 
-// Creating a new repository.
-func NewRepository(config config.DatabaseConfig) *Repository {
-	return &Repository{
-		Postgres: postgres.NewPostgresRepository(config.Postgres),
-		Redis:    redis.NewRedisRepository(config.Redis),
+// Creating a new redis repository.
+func NewRedisRepository(cfg config.RedisConfig) *RedisRepository {
+	log.Debug().Msg("Creating a new redis repository")
+
+	// Creating a new redis client.
+	client, err := redis.NewClient(cfg.URL)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create redis client")
 	}
+
+	return &RedisRepository{Code: NewCodeRepository(client)}
 }

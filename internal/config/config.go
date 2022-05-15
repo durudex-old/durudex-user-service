@@ -64,6 +64,7 @@ type (
 	// Database config variables.
 	DatabaseConfig struct {
 		Postgres PostgresConfig `mapstructure:"postgres"`
+		Redis    RedisConfig
 	}
 
 	// Postgres config variables.
@@ -72,6 +73,9 @@ type (
 		MinConns int32 `mapstructure:"min-conns"`
 		URL      string
 	}
+
+	// Redis config variables.
+	RedisConfig struct{ URL string }
 )
 
 // Initialize config.
@@ -138,6 +142,9 @@ func unmarshal(cfg *Config) error {
 func setFromEnv(cfg *Config) {
 	log.Debug().Msg("Set configurations from environment.")
 
-	// Postgres configurations.
+	// Postgres database configurations.
 	cfg.Database.Postgres.URL = os.Getenv("POSTGRES_URL")
+
+	// Redis database configurations.
+	cfg.Database.Redis.URL = os.Getenv("REDIS_URL")
 }

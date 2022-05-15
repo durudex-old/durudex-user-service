@@ -52,6 +52,23 @@ services:
     networks:
       - durudex-database
 
+  redis:
+    image: redis:alpine
+    container_name: user-redis
+    command: redis-server
+    hostname: user.redis.durudex.local
+    ports:
+      - 6380:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - durudex:/data
+    networks:
+      - durudex-database
+
 volumes:
   durudex:
     name: durudex

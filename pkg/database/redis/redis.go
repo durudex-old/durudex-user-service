@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,30 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package repository
+package redis
 
 import (
-	"github.com/durudex/durudex-user-service/internal/config"
-	"github.com/durudex/durudex-user-service/internal/repository/postgres"
-	"github.com/durudex/durudex-user-service/internal/repository/redis"
+	"github.com/go-redis/redis"
 )
 
-// Repository structure.
-type Repository struct {
-	Postgres *postgres.PostgresRepository
-	Redis    *redis.RedisRepository
-}
+// Redis driver interface.
+type Redis redis.Cmdable
 
-// Creating a new repository.
-func NewRepository(config config.DatabaseConfig) *Repository {
-	return &Repository{
-		Postgres: postgres.NewPostgresRepository(config.Postgres),
-		Redis:    redis.NewRedisRepository(config.Redis),
+// Creating a new Redis client.
+func NewClient(url string) (Redis, error) {
+	// Parsing redis url.
+	opt, err := redis.ParseURL(url)
+	if err != nil {
+		return nil, err
 	}
+
+	// Creating a new redis client.
+	conn := redis.NewClient(opt)
+
+	// Check for connections operation.
+	if err := conn.Ping().Err(); err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

@@ -26,7 +26,7 @@ import (
 // Test initialize config.
 func TestConfig_Init(t *testing.T) {
 	// Environment configurations.
-	type env struct{ configPath, postgresURL string }
+	type env struct{ configPath, postgresURL, redisURL string }
 
 	// Testing args.
 	type args struct{ env env }
@@ -35,6 +35,7 @@ func TestConfig_Init(t *testing.T) {
 	setEnv := func(env env) {
 		os.Setenv("CONFIG_PATH", env.configPath)
 		os.Setenv("POSTGRES_URL", env.postgresURL)
+		os.Setenv("REDIS_URL", env.redisURL)
 	}
 
 	// Tests structures.
@@ -49,6 +50,7 @@ func TestConfig_Init(t *testing.T) {
 			args: args{env: env{
 				configPath:  "fixtures/main",
 				postgresURL: "postgres://localhost:1",
+				redisURL:    "redis://user.redis.durudex.local:6379",
 			}},
 			want: &Config{
 				GRPC: GRPCConfig{
@@ -67,6 +69,7 @@ func TestConfig_Init(t *testing.T) {
 						MinConns: 5,
 						URL:      "postgres://localhost:1",
 					},
+					Redis: RedisConfig{URL: "redis://user.redis.durudex.local:6379"},
 				},
 				Hash: HashConfig{Password: PasswordConfig{Cost: 14}},
 			},
