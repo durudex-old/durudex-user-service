@@ -21,9 +21,7 @@ Service for working with users.
 
 ### 💡 Prerequisites
 + [Go 1.17](https://golang.org/)
-+ [grpc](https://grpc.io/docs/languages/go/quickstart/)
-+ [migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
-+ [golangci-lint](https://golangci-lint.run/usage/install/)
++ [Docker](https://www.docker.com/get-started/)
 
 ## ⚙️ Build & Run
 1) Create an `.env` file in the root directory and add the following values from `.env.example`:
