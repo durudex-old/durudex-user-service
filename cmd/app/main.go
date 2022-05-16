@@ -17,6 +17,58 @@
 
 package main
 
-func main() {
+import (
+	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/durudex/durudex-user-service/internal/config"
+	"github.com/durudex/durudex-user-service/internal/repository"
+	"github.com/durudex/durudex-user-service/internal/service"
+	"github.com/durudex/durudex-user-service/internal/transport/grpc"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+)
+
+// Initialize application.
+func init() {
+	// Set logger mode.
+	if os.Getenv("DEBUG") == "true" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+}
+
+// A function that running the application.
+func main() {
+	// Initialize config.
+	cfg, err := config.Init()
+	if err != nil {
+		log.Error().Err(err).Msg("error initialize config")
+	}
+
+	// Creating a new repository.
+	repos := repository.NewRepository(cfg.Database)
+	// Creating a new service.
+	service := service.NewService(repos, cfg)
+	// Creating a new gRPC handler.
+	handler := grpc.NewHandler(service)
+
+	// Create a new server.
+	srv := grpc.NewServer(cfg.GRPC, handler)
+
+	// Run server.
+	go srv.Run()
+
+	// Quit in application.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	// Stoping server.
+	srv.Stop()
+
+	log.Info().Msg("Durudex User Service stoping!")
 }

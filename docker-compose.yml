@@ -27,6 +27,7 @@ services:
       - 8004:8004
     depends_on:
       - postgres
+      - redis
     volumes:
       - ./.bin/:/root/
       - ./certs/:/root/certs/
