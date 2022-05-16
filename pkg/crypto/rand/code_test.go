@@ -24,7 +24,7 @@ import (
 )
 
 // Testing generating a random uint64 code.
-func TestCodeManager_Generate(t *testing.T) {
+func Test_Generate(t *testing.T) {
 	// Testing args.
 	type args struct{ maxLength, minLength int64 }
 

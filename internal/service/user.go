@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 	"github.com/durudex/durudex-user-service/pkg/hash"
@@ -40,12 +41,12 @@ type User interface {
 // User service structure.
 type UserService struct {
 	repos postgres.User
-	hash  hash.Password
+	cfg   config.PasswordConfig
 }
 
 // Creating a new user service.
-func NewUserService(repos postgres.User, hash hash.Password) *UserService {
-	return &UserService{repos: repos, hash: hash}
+func NewUserService(repos postgres.User, cfg config.PasswordConfig) *UserService {
+	return &UserService{repos: repos, cfg: cfg}
 }
 
 // Creating a new user.
@@ -56,7 +57,7 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, 
 	}
 
 	// Hasing user password.
-	hashPassword, err := s.hash.Hash(user.Password)
+	hashPassword, err := hash.Hash(user.Password, s.cfg.Cost)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
@@ -91,7 +92,7 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 	}
 
 	// Checking if user password is correct.
-	if !s.hash.Check(user.Password, password) {
+	if !hash.Check(user.Password, password) {
 		return domain.User{}, errors.New("invalid credentials")
 	}
 
@@ -106,7 +107,7 @@ func (s *UserService) ForgotPassword(ctx context.Context, password, email string
 	}
 
 	// Hashing input user password.
-	hashPassword, err := s.hash.Hash(password)
+	hashPassword, err := hash.Hash(password, s.cfg.Cost)
 	if err != nil {
 		return err
 	}

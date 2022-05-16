@@ -19,22 +19,20 @@ package hash
 
 import "golang.org/x/crypto/bcrypt"
 
-// Password hash manager.
-type PasswordManager struct{ Cost int }
-
-// Creating a new password hash manager.
-func NewPassword(cost int) *PasswordManager {
-	return &PasswordManager{Cost: cost}
+// Password hash interface.
+type Password interface {
+	Hash(password string, cost int) (string, error)
+	Check(hash, password string) bool
 }
 
 // Generating a new password hash.
-func (m *PasswordManager) Hash(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), m.Cost)
+func Hash(password string, cost int) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	return string(bytes), err
 }
 
 // Check password hash.
-func (m *PasswordManager) Check(hash, password string) bool {
+func Check(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

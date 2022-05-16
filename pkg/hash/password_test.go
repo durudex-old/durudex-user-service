@@ -15,12 +15,16 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package hash
+package hash_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/durudex/durudex-user-service/pkg/hash"
+)
 
 // Testing generating a new password hash.
-func TestPasswordManager_Hash(t *testing.T) {
+func Test_Hash(t *testing.T) {
 	// Testing args.
 	type args struct {
 		cost     int
@@ -45,10 +49,8 @@ func TestPasswordManager_Hash(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Creating a new password manager.
-			manager := NewPassword(tt.args.cost)
 
-			got, err := manager.Hash(tt.args.password)
+			got, err := hash.Hash(tt.args.password, tt.args.cost)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error hashing password: %s", err.Error())
 			}
@@ -62,7 +64,7 @@ func TestPasswordManager_Hash(t *testing.T) {
 }
 
 // Testing checking password hash.
-func TestPasswordManager_Check(t *testing.T) {
+func Test_Check(t *testing.T) {
 	// Testing args.
 	type args struct {
 		cost     int
@@ -99,11 +101,8 @@ func TestPasswordManager_Check(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Creating a new password manager.
-			manager := NewPassword(tt.args.cost)
-
 			// Check password hash.
-			got := manager.Check(tt.args.hash, tt.args.password)
+			got := hash.Check(tt.args.hash, tt.args.password)
 			if got != tt.want {
 				t.Error("password are not similar")
 			}
