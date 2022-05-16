@@ -53,6 +53,6 @@ buf:
 
 .PHONY: buf-lint
 buf-lint:
-	buf lint proto/src/durudex/v1/user.proto
+	buf lint proto/src/api/durudex/v1/user.proto
 
 .DEFAULT_GOAL := run
