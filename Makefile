@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5433/durudex
+POSTGRES_URL=postgresql://admin:qwerty@localhost:5433/durudex
 
 .PHONY: download
 download:
@@ -50,9 +50,11 @@ migrate-down:
 .PHONY: buf
 buf:
 	buf generate proto/src/api --path proto/src/api/durudex/v1/user.proto
+	buf generate proto/src/api --path proto/src/api/durudex/v1/email.proto
 
 .PHONY: buf-lint
 buf-lint:
 	buf lint proto/src/api/durudex/v1/user.proto
+	buf lint proto/src/api/durudex/v1/email.proto
 
 .DEFAULT_GOAL := run

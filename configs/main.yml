@@ -34,3 +34,12 @@ code:
   ttl: "15m"
   max-length: 999999
   min-length: 100000
+
+service:
+  email:
+    addr: "email.service.durudex.local:8002"
+    tls:
+      enable: true
+      ca-cert: "./certs/rootCA.pem"
+      cert: "./certs/client-cert.pem"
+      key: "./certs/client-key.pem"

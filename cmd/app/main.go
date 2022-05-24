@@ -54,7 +54,7 @@ func main() {
 	// Creating a new service.
 	service := service.NewService(repos, cfg)
 	// Creating a new gRPC handler.
-	handler := grpc.NewHandler(service)
+	handler := grpc.NewHandler(service, cfg.Service)
 
 	// Create a new server.
 	srv := grpc.NewServer(cfg.GRPC, handler)
@@ -67,8 +67,8 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	// Stoping server.
+	// Stopping server.
 	srv.Stop()
 
-	log.Info().Msg("Durudex User Service stoping!")
+	log.Info().Msg("Durudex User Service stopping!")
 }

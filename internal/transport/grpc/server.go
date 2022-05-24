@@ -65,7 +65,7 @@ func (s *Server) Run() {
 	}
 }
 
-// Stoping gRPC server.
+// Stopping gRPC server.
 func (s *Server) Stop() {
 	log.Info().Msg("Stopping gRPC server...")
 

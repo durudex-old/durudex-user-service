@@ -28,7 +28,7 @@ import (
 
 // Code service interface.
 type Code interface {
-	CreateVerifyEmailCode(ctx context.Context, email string) error
+	CreateVerifyEmailCode(ctx context.Context, email string) (uint64, error)
 	VerifyEmailCode(ctx context.Context, email string, input uint64) (bool, error)
 }
 
@@ -44,14 +44,19 @@ func NewCodeService(repos redis.Code, config config.CodeConfig) *CodeService {
 }
 
 // Creating a new user verification email code.
-func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) error {
+func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) (uint64, error) {
 	// Generate random code.
 	code, err := rand.Generate(s.config.MaxLength, s.config.MinLength)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return s.repos.CreateByEmail(ctx, email, code, s.config.TTL)
+	// Creating a new code.
+	if err := s.repos.CreateByEmail(ctx, email, code, s.config.TTL); err != nil {
+		return 0, err
+	}
+
+	return code, nil
 }
 
 // Verifying a user verification email code.

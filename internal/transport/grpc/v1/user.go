@@ -31,12 +31,13 @@ import (
 // User gRPC server handler.
 type UserHandler struct {
 	service *service.Service
+	email   v1.EmailServiceClient
 	v1.UnimplementedUserServiceServer
 }
 
 // Creating a new user gRPC handler.
-func NewUserHandler(service *service.Service) *UserHandler {
-	return &UserHandler{service: service}
+func NewUserHandler(service *service.Service, email v1.EmailServiceClient) *UserHandler {
+	return &UserHandler{service: service, email: email}
 }
 
 // Creating a new user handler.
@@ -107,7 +108,17 @@ func (h *UserHandler) UpdateUserAvatar(ctx context.Context, input *v1.UpdateUser
 // Creating a new user verification email code.
 func (h *UserHandler) CreateVerifyUserEmailCode(ctx context.Context, input *v1.CreateVerifyUserEmailCodeRequest) (*v1.CreateVerifyUserEmailCodeResponse, error) {
 	// Create a new user verification email code.
-	err := h.service.Code.CreateVerifyEmailCode(ctx, input.Email)
+	code, err := h.service.Code.CreateVerifyEmailCode(ctx, input.Email)
+	if err != nil {
+		return &v1.CreateVerifyUserEmailCodeResponse{}, err
+	}
+
+	// Sending a verification email code.
+	_, err = h.email.SendEmailUserCode(ctx, &v1.SendEmailUserCodeRequest{
+		Email:    input.Email,
+		Username: "new user",
+		Code:     code,
+	})
 	if err != nil {
 		return &v1.CreateVerifyUserEmailCodeResponse{}, err
 	}

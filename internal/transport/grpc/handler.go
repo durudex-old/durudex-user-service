@@ -18,6 +18,7 @@
 package grpc
 
 import (
+	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/service"
 	v1 "github.com/durudex/durudex-user-service/internal/transport/grpc/v1"
 
@@ -25,14 +26,20 @@ import (
 )
 
 // gRPC server handler structure.
-type Handler struct{ service *service.Service }
+type Handler struct {
+	service *service.Service
+	client  *Client
+}
 
 // Creating a new gRPC handler.
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *service.Service, cfg config.ServiceConfig) *Handler {
+	// Creating a new gRPC client.
+	client := NewClient(cfg)
+
+	return &Handler{service: service, client: client}
 }
 
 // Registering gRPC version handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	v1.NewHandler(h.service).RegisterHandlers(srv)
+	v1.NewHandler(h.service, h.client.Email).RegisterHandlers(srv)
 }

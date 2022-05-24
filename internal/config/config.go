@@ -36,6 +36,7 @@ type (
 		Database DatabaseConfig
 		Password PasswordConfig
 		Code     CodeConfig
+		Service  ServiceConfig
 	}
 
 	// gRPC server config variables.
@@ -80,6 +81,17 @@ type (
 
 	// Redis config variables.
 	RedisConfig struct{ URL string }
+
+	// Service base config.
+	Service struct {
+		Addr string    `mapstructure:"addr"`
+		TLS  TLSConfig `mapstructure:"tls"`
+	}
+
+	// Service config variables.
+	ServiceConfig struct {
+		Email Service `mapstructure:"email"`
+	}
 )
 
 // Initialize config.
@@ -140,6 +152,10 @@ func unmarshal(cfg *Config) error {
 	}
 	// Unmarshal postgres database keys.
 	if err := viper.UnmarshalKey("database", &cfg.Database); err != nil {
+		return err
+	}
+	// Unmarshal service keys.
+	if err := viper.UnmarshalKey("service", &cfg.Service); err != nil {
 		return err
 	}
 	// Unmarshal server keys.
