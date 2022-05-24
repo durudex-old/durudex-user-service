@@ -26,6 +26,8 @@ import (
 	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 
 	"github.com/gofrs/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // User gRPC server handler.
@@ -40,8 +42,16 @@ func NewUserHandler(service *service.Service, email v1.EmailServiceClient) *User
 	return &UserHandler{service: service, email: email}
 }
 
-// Creating a new user handler.
-func (h *UserHandler) CreateUser(ctx context.Context, input *v1.CreateUserRequest) (*v1.CreateUserResponse, error) {
+// User Sign Up handler.
+func (h *UserHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpRequest) (*v1.UserSignUpResponse, error) {
+	// Verify email code.
+	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
+	if err != nil {
+		return &v1.UserSignUpResponse{}, err
+	} else if !verify {
+		return &v1.UserSignUpResponse{}, status.Error(codes.InvalidArgument, "Invalid Code")
+	}
+
 	// Creating a new user.
 	id, err := h.service.User.Create(ctx, domain.User{
 		Username: input.Username,
@@ -49,10 +59,19 @@ func (h *UserHandler) CreateUser(ctx context.Context, input *v1.CreateUserReques
 		Password: input.Password,
 	})
 	if err != nil {
-		return &v1.CreateUserResponse{}, err
+		return &v1.UserSignUpResponse{}, err
 	}
 
-	return &v1.CreateUserResponse{Id: id.Bytes()}, nil
+	// Send registration email.
+	_, err = h.email.SendEmailUserRegister(ctx, &v1.SendEmailUserRegisterRequest{
+		Email:    input.Email,
+		Username: input.Username,
+	})
+	if err != nil {
+		return &v1.UserSignUpResponse{}, err
+	}
+
+	return &v1.UserSignUpResponse{Id: id.Bytes()}, nil
 }
 
 // Getting user by id.
@@ -92,8 +111,16 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *v1.GetUserByCre
 
 // Forgot user password.
 func (h *UserHandler) ForgotUserPassword(ctx context.Context, input *v1.ForgotUserPasswordRequest) (*v1.ForgotUserPasswordResponse, error) {
+	// Verify email code.
+	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
+	if err != nil {
+		return &v1.ForgotUserPasswordResponse{}, err
+	} else if !verify {
+		return &v1.ForgotUserPasswordResponse{}, status.Error(codes.InvalidArgument, "Invalid Code")
+	}
+
 	// Forgot user password.
-	err := h.service.User.ForgotPassword(ctx, input.Password, input.Email)
+	err = h.service.User.ForgotPassword(ctx, input.Password, input.Email)
 	if err != nil {
 		return &v1.ForgotUserPasswordResponse{}, err
 	}
