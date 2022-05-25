@@ -19,7 +19,6 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/domain"
@@ -56,7 +55,7 @@ func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, 
 		return uuid.UUID{}, err
 	}
 
-	// Hasing user password.
+	// Hashing user password.
 	hashPassword, err := hash.Hash(user.Password, s.cfg.Cost)
 	if err != nil {
 		return uuid.UUID{}, err
@@ -93,7 +92,7 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 
 	// Checking if user password is correct.
 	if !hash.Check(user.Password, password) {
-		return domain.User{}, errors.New("invalid credentials")
+		return domain.User{}, &domain.Error{Code: domain.StatusInvalidArgument, Message: "Invalid Credentials"}
 	}
 
 	return user, nil
@@ -103,7 +102,7 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 func (s *UserService) ForgotPassword(ctx context.Context, password, email string) error {
 	// Check user password.
 	if !domain.RxPassword.MatchString(password) {
-		return domain.ErrPasswordIsIncorrect
+		return &domain.Error{Code: domain.StatusInvalidArgument, Message: "Invalid Password"}
 	}
 
 	// Hashing input user password.

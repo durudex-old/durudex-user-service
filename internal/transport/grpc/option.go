@@ -59,7 +59,13 @@ func getOptions(cfg config.TLSConfig) []grpc.ServerOption {
 func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	log.Info().Str("method", info.FullMethod).Msg("Unary interceptor")
 
-	return handler(ctx, req)
+	// Call the handler.
+	h, err := handler(ctx, req)
+	if err != nil {
+		return h, errorHandler(err)
+	}
+
+	return h, nil
 }
 
 // Stream gRPC server interceptor.

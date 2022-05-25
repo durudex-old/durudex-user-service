@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,34 +17,25 @@
 
 package domain
 
-import (
-	"time"
+import "fmt"
 
-	"github.com/gofrs/uuid"
+// Error status code.
+type Code int32
+
+// Error status codes.
+const (
+	StatusNotFound Code = iota
+	StatusAlreadyExists
+	StatusInvalidArgument
 )
 
-// User model.
-type User struct {
-	ID        uuid.UUID
-	Username  string
-	Email     string
-	Password  string
-	CreatedAt time.Time
-	LastVisit time.Time
-	Verified  bool
-	AvatarURL *string
+// Error structure.
+type Error struct {
+	Code    Code
+	Message string
 }
 
-// Validate user.
-func (u *User) Validate() error {
-	switch {
-	case !RxUsername.MatchString(u.Username):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Username"}
-	case !RxPassword.MatchString(u.Password):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Password"}
-	case !RxEmail.MatchString(u.Email):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Email"}
-	}
-
-	return nil
+// Getting error message.
+func (e *Error) Error() string {
+	return fmt.Sprintf("%d: %s", e.Code, e.Message)
 }
