@@ -49,7 +49,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - durudex:/var/lib/postgresql/data
+      - durudex-user:/var/lib/postgresql/data
     networks:
       - durudex-database
 
@@ -66,13 +66,13 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - durudex:/data
+      - durudex-user:/data
     networks:
       - durudex-database
 
 volumes:
-  durudex:
-    name: durudex
+  durudex-user:
+    name: durudex-user
 
 networks:
   durudex-backend:
