@@ -26,8 +26,6 @@ import (
 	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 
 	"github.com/gofrs/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // User gRPC server handler.
@@ -46,10 +44,8 @@ func NewUserHandler(service *service.Service, email v1.EmailServiceClient) *User
 func (h *UserHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpRequest) (*v1.UserSignUpResponse, error) {
 	// Verify email code.
 	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
+	if err != nil || !verify {
 		return &v1.UserSignUpResponse{}, err
-	} else if !verify {
-		return &v1.UserSignUpResponse{}, status.Error(codes.InvalidArgument, "Invalid Code")
 	}
 
 	// Creating a new user.
@@ -113,10 +109,8 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *v1.GetUserByCre
 func (h *UserHandler) ForgotUserPassword(ctx context.Context, input *v1.ForgotUserPasswordRequest) (*v1.ForgotUserPasswordResponse, error) {
 	// Verify email code.
 	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
+	if err != nil || !verify {
 		return &v1.ForgotUserPasswordResponse{}, err
-	} else if !verify {
-		return &v1.ForgotUserPasswordResponse{}, status.Error(codes.InvalidArgument, "Invalid Code")
 	}
 
 	// Forgot user password.

@@ -19,9 +19,9 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/durudex/durudex-user-service/internal/config"
+	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/redis"
 	"github.com/durudex/durudex-user-service/pkg/crypto/rand"
 )
@@ -69,7 +69,7 @@ func (s *CodeService) VerifyEmailCode(ctx context.Context, email string, input u
 
 	// Check input code.
 	if input != code {
-		return false, errors.New("invalid code")
+		return false, &domain.Error{Code: domain.CodeInvalidArgument, Message: "Invalid Code"}
 	}
 
 	return true, nil

@@ -92,7 +92,7 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 
 	// Checking if user password is correct.
 	if !hash.Check(user.Password, password) {
-		return domain.User{}, &domain.Error{Code: domain.StatusInvalidArgument, Message: "Invalid Credentials"}
+		return domain.User{}, &domain.Error{Code: domain.CodeInvalidArgument, Message: "Invalid Credentials"}
 	}
 
 	return user, nil
@@ -102,7 +102,7 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 func (s *UserService) ForgotPassword(ctx context.Context, password, email string) error {
 	// Check user password.
 	if !domain.RxPassword.MatchString(password) {
-		return &domain.Error{Code: domain.StatusInvalidArgument, Message: "Invalid Password"}
+		return &domain.Error{Code: domain.CodeInvalidArgument, Message: "Invalid Password"}
 	}
 
 	// Hashing input user password.

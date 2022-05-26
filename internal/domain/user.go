@@ -39,11 +39,11 @@ type User struct {
 func (u *User) Validate() error {
 	switch {
 	case !RxUsername.MatchString(u.Username):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Username"}
+		return &Error{Code: CodeInvalidArgument, Message: "Invalid Username"}
 	case !RxPassword.MatchString(u.Password):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Password"}
+		return &Error{Code: CodeInvalidArgument, Message: "Invalid Password"}
 	case !RxEmail.MatchString(u.Email):
-		return &Error{Code: StatusInvalidArgument, Message: "Invalid Email"}
+		return &Error{Code: CodeInvalidArgument, Message: "Invalid Email"}
 	}
 
 	return nil

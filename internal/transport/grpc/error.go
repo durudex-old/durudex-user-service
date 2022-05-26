@@ -33,13 +33,13 @@ func errorHandler(err error) error {
 	// Check if error is a domain.Error.
 	if errors.As(err, &e) {
 		switch e.Code {
-		case domain.StatusNotFound:
+		case domain.CodeNotFound:
 			// Return gRPC error with status code not found.
 			return status.Error(codes.NotFound, e.Message)
-		case domain.StatusAlreadyExists:
+		case domain.CodeAlreadyExists:
 			// Return gRPC error with status code already exists.
 			return status.Error(codes.AlreadyExists, e.Message)
-		case domain.StatusInvalidArgument:
+		case domain.CodeInvalidArgument:
 			// Return gRPC error with status code invalid argument.
 			return status.Error(codes.InvalidArgument, e.Message)
 		}

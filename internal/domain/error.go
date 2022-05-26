@@ -24,9 +24,9 @@ type Code int32
 
 // Error status codes.
 const (
-	StatusNotFound Code = iota
-	StatusAlreadyExists
-	StatusInvalidArgument
+	CodeNotFound Code = iota
+	CodeAlreadyExists
+	CodeInvalidArgument
 )
 
 // Error structure.
