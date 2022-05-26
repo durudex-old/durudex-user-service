@@ -76,7 +76,7 @@ func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (domain.User, e
 	// Getting user by id.
 	user, err := s.repos.GetByID(ctx, id)
 	if err != nil {
-		return domain.User{}, nil
+		return domain.User{}, err
 	}
 
 	return user, nil

@@ -19,12 +19,16 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/pkg/database/postgres"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v4"
 )
 
 // User table name.
@@ -58,7 +62,18 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (uuid.UUI
 	// Query and get user uuid.
 	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
-		return uuid.UUID{}, err
+		var pgErr *pgconn.PgError
+
+		// Get postgres error.
+		if errors.As(err, &pgErr) {
+			// Switching postgres error code.
+			if pgErr.Code == pgerrcode.UniqueViolation {
+				// Return error if user with same username or email exists.
+				return uuid.Nil, &domain.Error{Code: domain.CodeAlreadyExists, Message: "User already exists"}
+			}
+		}
+
+		return uuid.Nil, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
 	}
 
 	return id, nil
@@ -79,7 +94,11 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User
 	// Scanning query row.
 	err := row.Scan(&user.Username, &user.CreatedAt, &user.LastVisit, &user.Verified, &user.AvatarURL)
 	if err != nil {
-		return domain.User{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, &domain.Error{Code: domain.CodeNotFound, Message: "User not found"}
+		}
+
+		return domain.User{}, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
 	}
 
 	return user, nil
@@ -101,7 +120,11 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt, &user.LastVisit,
 		&user.Verified, &user.AvatarURL)
 	if err != nil {
-		return domain.User{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, &domain.Error{Code: domain.CodeNotFound, Message: "User not found"}
+		}
+
+		return domain.User{}, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
 	}
 
 	return user, nil

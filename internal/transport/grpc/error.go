@@ -42,6 +42,8 @@ func errorHandler(err error) error {
 		case domain.CodeInvalidArgument:
 			// Return gRPC error with status code invalid argument.
 			return status.Error(codes.InvalidArgument, e.Message)
+		case domain.CodeInternal:
+			return status.Error(codes.Internal, "Internal Server Error")
 		}
 	}
 
