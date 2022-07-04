@@ -36,7 +36,7 @@ type User struct {
 }
 
 // Validate user.
-func (u *User) Validate() error {
+func (u User) Validate() error {
 	switch {
 	case !RxUsername.MatchString(u.Username):
 		return &Error{Code: CodeInvalidArgument, Message: "Invalid Username"}

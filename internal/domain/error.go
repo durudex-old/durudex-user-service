@@ -20,7 +20,7 @@ package domain
 import "fmt"
 
 // Error status code.
-type Code int32
+type Code int
 
 // Error status codes.
 const (
