@@ -1,16 +1,16 @@
 /*
  * Copyright © 2022 Durudex
-
+ *
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
-
+ *
  * Durudex is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
-
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -27,8 +27,8 @@ import (
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 
-	"github.com/gofrs/uuid"
 	"github.com/pashagolub/pgxmock"
+	"github.com/segmentio/ksuid"
 )
 
 // Testing creating a new user in postgres database.
@@ -43,8 +43,8 @@ func TestUserRepository_Create(t *testing.T) {
 	// Testing args.
 	type args struct{ user domain.User }
 
-	// Test bahavior.
-	type mockBehavior func(args args, id uuid.UUID)
+	// Test behavior.
+	type mockBehavior func(args args, id ksuid.KSUID)
 
 	// Creating a new repository.
 	repos := postgres.NewUserRepository(mock)
@@ -53,7 +53,7 @@ func TestUserRepository_Create(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         args
-		want         uuid.UUID
+		want         ksuid.KSUID
 		wantErr      bool
 		mockBehavior mockBehavior
 	}{
@@ -61,14 +61,14 @@ func TestUserRepository_Create(t *testing.T) {
 			name: "OK",
 			args: args{user: domain.User{
 				Username: "example",
-				Email:    "example@example.example",
+				Email:    "example@durudex.com",
 				Password: "qwerty",
 			}},
-			want: uuid.UUID{},
-			mockBehavior: func(args args, want uuid.UUID) {
+			want: ksuid.New(),
+			mockBehavior: func(args args, want ksuid.KSUID) {
 				mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, postgres.UserTable)).
 					WithArgs(args.user.Username, args.user.Email, args.user.Password).
-					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want))
+					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want.String()))
 			},
 		},
 	}
@@ -102,9 +102,9 @@ func TestUserRepository_GetByID(t *testing.T) {
 	defer mock.Close(context.Background())
 
 	// Testing args.
-	type args struct{ id uuid.UUID }
+	type args struct{ id ksuid.KSUID }
 
-	// Test bahavior.
+	// Test behavior.
 	type mockBehavior func(args args, user domain.User)
 
 	// Creating a new repository.
@@ -120,22 +120,20 @@ func TestUserRepository_GetByID(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{id: uuid.UUID{}},
+			args: args{id: ksuid.New()},
 			want: domain.User{
 				Username:  "example",
-				CreatedAt: time.Now(),
 				LastVisit: time.Now(),
 				Verified:  true,
-				AvatarURL: nil,
+				AvatarUrl: nil,
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"username", "created_at", "last_visit", "verified", "avatar_url",
-				}).AddRow(
-					user.Username, user.CreatedAt, user.LastVisit, user.Verified, user.AvatarURL)
+					"username", "last_visit", "verified", "avatar_url",
+				}).AddRow(user.Username, user.LastVisit, user.Verified, user.AvatarUrl)
 
 				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
-					WithArgs(args.id).
+					WithArgs(args.id.String()).
 					WillReturnRows(rows)
 			},
 		},
@@ -172,7 +170,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 	// Testing args.
 	type args struct{ username string }
 
-	// Test bahavior.
+	// Test behavior.
 	type mockBehavior func(args args, user domain.User)
 
 	// Creating a new repository.
@@ -190,22 +188,18 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 			name: "OK",
 			args: args{username: "example"},
 			want: domain.User{
-				ID:        uuid.UUID{},
-				Username:  "example",
+				Id:        ksuid.New(),
 				Email:     "example@example.example",
 				Password:  "qwerty123",
-				CreatedAt: time.Now(),
 				LastVisit: time.Now(),
 				Verified:  true,
-				AvatarURL: nil,
+				AvatarUrl: nil,
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"id", "email", "password", "created_at", "last_visit",
-					"verified", "avatar_url",
-				}).AddRow(
-					user.ID, user.Email, user.Password, user.CreatedAt,
-					user.LastVisit, user.Verified, user.AvatarURL)
+					"id", "email", "password", "last_visit", "verified", "avatar_url",
+				}).AddRow(user.Id.String(), user.Email, user.Password, user.LastVisit,
+					user.Verified, user.AvatarUrl)
 
 				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
 					WithArgs(args.username).
@@ -245,7 +239,7 @@ func TestUserRepository_ForgotPassword(t *testing.T) {
 	// Testing args.
 	type args struct{ email, password string }
 
-	// Test bahavior.
+	// Test behavior.
 	type mockBehavior func(args args)
 
 	// Creating a new repository.
@@ -295,10 +289,10 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 	// Testing args.
 	type args struct {
 		avatarUrl string
-		id        uuid.UUID
+		id        ksuid.KSUID
 	}
 
-	// Test bahavior.
+	// Test behavior.
 	type mockBehavior func(args args)
 
 	// Creating a new repository.
@@ -314,12 +308,12 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 		{
 			name: "OK",
 			args: args{
-				avatarUrl: "https://cdn.durudex.com/avatar/a6d84129-d957-4c4d-9935-236d660bdd42/user.png",
-				id:        uuid.UUID{},
+				avatarUrl: "https://cdn.durudex.com/avatar/0ujzPyRiIAffKhBux4PvQdDqMHY/user.png",
+				id:        ksuid.New(),
 			},
 			mockBehavior: func(args args) {
 				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
-					WithArgs(args.avatarUrl, args.id).
+					WithArgs(args.avatarUrl, args.id.String()).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
 		},

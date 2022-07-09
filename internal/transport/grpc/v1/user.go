@@ -25,7 +25,9 @@ import (
 	"github.com/durudex/durudex-user-service/internal/service"
 	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 
-	"github.com/gofrs/uuid"
+	"github.com/segmentio/ksuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // User gRPC server handler.
@@ -72,18 +74,23 @@ func (h *UserHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpReques
 
 // Getting user by id.
 func (h *UserHandler) GetUserById(ctx context.Context, input *v1.GetUserByIdRequest) (*v1.GetUserByIdResponse, error) {
+	// Getting user id from bytes.
+	id, err := ksuid.FromBytes(input.Id)
+	if err != nil {
+		return &v1.GetUserByIdResponse{}, status.Error(codes.InvalidArgument, "Invalid Id")
+	}
+
 	// Getting user by id.
-	user, err := h.service.User.GetByID(ctx, uuid.FromBytesOrNil(input.Id))
+	user, err := h.service.User.GetByID(ctx, id)
 	if err != nil {
 		return &v1.GetUserByIdResponse{}, err
 	}
 
 	return &v1.GetUserByIdResponse{
 		Username:  user.Username,
-		CreatedAt: timestamp.New(user.CreatedAt),
 		LastVisit: timestamp.New(user.LastVisit),
 		Verified:  user.Verified,
-		AvatarUrl: user.AvatarURL,
+		AvatarUrl: user.AvatarUrl,
 	}, nil
 }
 
@@ -96,12 +103,11 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *v1.GetUserByCre
 	}
 
 	return &v1.GetUserByCredsResponse{
-		Id:        user.ID.Bytes(),
+		Id:        user.Id.Bytes(),
 		Email:     user.Email,
-		CreatedAt: timestamp.New(user.CreatedAt),
 		LastVisit: timestamp.New(user.LastVisit),
 		Verified:  user.Verified,
-		AvatarUrl: user.AvatarURL,
+		AvatarUrl: user.AvatarUrl,
 	}, nil
 }
 

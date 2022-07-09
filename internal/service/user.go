@@ -1,16 +1,16 @@
 /*
  * Copyright © 2021-2022 Durudex
-
+ *
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
-
+ *
  * Durudex is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
-
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -25,16 +25,16 @@ import (
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 	"github.com/durudex/durudex-user-service/pkg/hash"
 
-	"github.com/gofrs/uuid"
+	"github.com/segmentio/ksuid"
 )
 
 // User service interface.
 type User interface {
-	Create(ctx context.Context, user domain.User) (uuid.UUID, error)
-	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
+	Create(ctx context.Context, user domain.User) (ksuid.KSUID, error)
+	GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
-	UpdateAvatar(ctx context.Context, id uuid.UUID, avatarUrl string) error
+	UpdateAvatar(ctx context.Context, id ksuid.KSUID, avatarUrl string) error
 }
 
 // User service structure.
@@ -49,30 +49,30 @@ func NewUserService(repos postgres.User, cfg config.PasswordConfig) *UserService
 }
 
 // Creating a new user.
-func (s *UserService) Create(ctx context.Context, user domain.User) (uuid.UUID, error) {
+func (s *UserService) Create(ctx context.Context, user domain.User) (ksuid.KSUID, error) {
 	// Validate user.
 	if err := user.Validate(); err != nil {
-		return uuid.UUID{}, err
+		return ksuid.Nil, err
 	}
 
 	// Hashing user password.
 	hashPassword, err := hash.Hash(user.Password, s.cfg.Cost)
 	if err != nil {
-		return uuid.UUID{}, err
+		return ksuid.Nil, err
 	}
 	user.Password = hashPassword
 
 	// Creating a new user in postgres database.
 	id, err := s.repos.Create(ctx, user)
 	if err != nil {
-		return uuid.UUID{}, err
+		return ksuid.Nil, err
 	}
 
 	return id, nil
 }
 
 // Getting user by id.
-func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
+func (s *UserService) GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error) {
 	// Getting user by id.
 	user, err := s.repos.GetByID(ctx, id)
 	if err != nil {
@@ -116,6 +116,6 @@ func (s *UserService) ForgotPassword(ctx context.Context, password, email string
 }
 
 // Updating user avatar.
-func (s *UserService) UpdateAvatar(ctx context.Context, id uuid.UUID, avatarUrl string) error {
+func (s *UserService) UpdateAvatar(ctx context.Context, id ksuid.KSUID, avatarUrl string) error {
 	return s.repos.UpdateAvatar(ctx, avatarUrl, id)
 }
