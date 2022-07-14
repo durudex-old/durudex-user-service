@@ -25,7 +25,10 @@ import (
 )
 
 // Postgres repository structure.
-type PostgresRepository struct{ User }
+type PostgresRepository struct {
+	User
+	Session
+}
 
 // Creating a new postgres repository.
 func NewPostgresRepository(cfg config.PostgresConfig) *PostgresRepository {
@@ -41,5 +44,8 @@ func NewPostgresRepository(cfg config.PostgresConfig) *PostgresRepository {
 		log.Fatal().Err(err).Msg("failed to create postgres client")
 	}
 
-	return &PostgresRepository{User: NewUserRepository(client)}
+	return &PostgresRepository{
+		User:    NewUserRepository(client),
+		Session: NewSessionRepository(client),
+	}
 }

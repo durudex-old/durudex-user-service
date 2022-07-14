@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/durudex/dugopb/type/timestamp"
-	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/service"
 	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 
@@ -40,37 +39,6 @@ type UserHandler struct {
 // Creating a new user gRPC handler.
 func NewUserHandler(service *service.Service, email v1.EmailServiceClient) *UserHandler {
 	return &UserHandler{service: service, email: email}
-}
-
-// User Sign Up handler.
-func (h *UserHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpRequest) (*v1.UserSignUpResponse, error) {
-	// Verify email code.
-	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil || !verify {
-		return &v1.UserSignUpResponse{}, err
-	}
-
-	// Creating a new user.
-	id, err := h.service.User.Create(ctx, domain.User{
-		Id:       ksuid.New(),
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-	})
-	if err != nil {
-		return &v1.UserSignUpResponse{}, err
-	}
-
-	// Send registration email.
-	_, err = h.email.SendEmailUserRegister(ctx, &v1.SendEmailUserRegisterRequest{
-		Email:    input.Email,
-		Username: input.Username,
-	})
-	if err != nil {
-		return &v1.UserSignUpResponse{}, err
-	}
-
-	return &v1.UserSignUpResponse{Id: id.Bytes()}, nil
 }
 
 // Getting user by id.

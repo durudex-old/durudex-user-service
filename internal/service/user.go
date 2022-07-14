@@ -40,11 +40,11 @@ type User interface {
 // User service structure.
 type UserService struct {
 	repos postgres.User
-	cfg   config.PasswordConfig
+	cfg   *config.PasswordConfig
 }
 
 // Creating a new user service.
-func NewUserService(repos postgres.User, cfg config.PasswordConfig) *UserService {
+func NewUserService(repos postgres.User, cfg *config.PasswordConfig) *UserService {
 	return &UserService{repos: repos, cfg: cfg}
 }
 

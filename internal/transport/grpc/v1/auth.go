@@ -20,11 +20,17 @@ package v1
 import (
 	"context"
 
+	"github.com/durudex/durudex-user-service/internal/domain"
+	"github.com/durudex/durudex-user-service/internal/service"
 	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
+
+	"github.com/segmentio/ksuid"
 )
 
 // User auth gRPC handler.
 type AuthHandler struct {
+	auth  service.Auth
+	email v1.EmailServiceClient
 	v1.UnimplementedUserAuthServiceServer
 }
 
@@ -33,8 +39,29 @@ func NewAuthHandler() *AuthHandler {
 	return &AuthHandler{}
 }
 
+// User Sign Up gRPC handler.
 func (h *AuthHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpRequest) (*v1.UserSignUpResponse, error) {
-	return &v1.UserSignUpResponse{}, nil
+	// User Sign Up.
+	tokens, err := h.auth.SignUp(ctx, domain.User{
+		Id:       ksuid.New(),
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+	}, input.Code, input.Ip)
+	if err != nil {
+		return nil, err
+	}
+
+	// Send registration email.
+	_, err = h.email.SendEmailUserRegister(ctx, &v1.SendEmailUserRegisterRequest{
+		Email:    input.Email,
+		Username: input.Username,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.UserSignUpResponse{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
 func (h *AuthHandler) UserSignIn(ctx context.Context, input *v1.UserSignInRequest) (*v1.UserSignInResponse, error) {

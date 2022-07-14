@@ -35,11 +35,11 @@ type Code interface {
 // Code service structure.
 type CodeService struct {
 	repos  redis.Code
-	config config.CodeConfig
+	config *config.CodeConfig
 }
 
 // Creating a new code service.
-func NewCodeService(repos redis.Code, config config.CodeConfig) *CodeService {
+func NewCodeService(repos redis.Code, config *config.CodeConfig) *CodeService {
 	return &CodeService{repos: repos, config: config}
 }
 

@@ -31,3 +31,6 @@ type Session struct {
 	Ip           string
 	ExpiresIn    time.Time
 }
+
+// Authorization user tokens.
+type Tokens struct{ Access, Refresh string }

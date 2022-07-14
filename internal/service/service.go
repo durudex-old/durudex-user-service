@@ -25,13 +25,17 @@ import (
 // Service structure.
 type Service struct {
 	User
+	Auth
 	Code
 }
 
 // Creating a new service.
 func NewService(repos *repository.Repository, config *config.Config) *Service {
+	userService := NewUserService(repos.Postgres.User, &config.Password)
+
 	return &Service{
-		User: NewUserService(repos.Postgres, config.Password),
-		Code: NewCodeService(repos.Redis, config.Code),
+		User: userService,
+		Auth: NewAuthService(userService, repos.Postgres.Session, &config.Auth),
+		Code: NewCodeService(repos.Redis, &config.Code),
 	}
 }
