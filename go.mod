@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/durudex/dugopb v0.0.0-20220510164815-ab4ab3c8f7c8
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgconn v1.11.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgtype v1.10.0
