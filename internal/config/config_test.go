@@ -29,7 +29,7 @@ import (
 // Test initialize config.
 func TestConfig_Init(t *testing.T) {
 	// Environment configurations.
-	type env struct{ configPath, postgresURL, redisURL string }
+	type env struct{ configPath, postgresURL, redisURL, jwtSigningKey string }
 
 	// Testing args.
 	type args struct{ env env }
@@ -39,6 +39,7 @@ func TestConfig_Init(t *testing.T) {
 		os.Setenv("CONFIG_PATH", env.configPath)
 		os.Setenv("POSTGRES_URL", env.postgresURL)
 		os.Setenv("REDIS_URL", env.redisURL)
+		os.Setenv("JWT_SIGNING_KEY", env.jwtSigningKey)
 	}
 
 	// Tests structures.
@@ -51,9 +52,10 @@ func TestConfig_Init(t *testing.T) {
 		{
 			name: "OK",
 			args: args{env: env{
-				configPath:  "fixtures/main",
-				postgresURL: "postgres://localhost:1",
-				redisURL:    "redis://user.redis.durudex.local:6379",
+				configPath:    "fixtures/main",
+				postgresURL:   "postgres://localhost:1",
+				redisURL:      "redis://user.redis.durudex.local:6379",
+				jwtSigningKey: "secret-key",
 			}},
 			want: &config.Config{
 				GRPC: config.GRPCConfig{
@@ -79,6 +81,13 @@ func TestConfig_Init(t *testing.T) {
 					TTL:       time.Minute * 15,
 					MaxLength: 999999,
 					MinLength: 100000,
+				},
+				Auth: config.AuthConfig{
+					JWT: config.JWTConfig{
+						SigningKey: "secret-key",
+						TTL:        time.Minute * 15,
+					},
+					Session: config.SessionConfig{TTL: time.Hour * 720},
 				},
 				Service: config.ServiceConfig{
 					Email: config.Service{

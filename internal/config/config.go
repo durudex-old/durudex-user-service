@@ -36,6 +36,7 @@ type (
 		Database DatabaseConfig
 		Password PasswordConfig
 		Code     CodeConfig
+		Auth     AuthConfig
 		Service  ServiceConfig
 	}
 
@@ -64,6 +65,23 @@ type (
 		TTL       time.Duration `mapstructure:"ttl"`
 		MaxLength int64         `mapstructure:"max-length"`
 		MinLength int64         `mapstructure:"min-length"`
+	}
+
+	// Auth config variables.
+	AuthConfig struct {
+		JWT     JWTConfig     `mapstructure:"jwt"`
+		Session SessionConfig `mapstructure:"session"`
+	}
+
+	// JWT config variables.
+	JWTConfig struct {
+		SigningKey string
+		TTL        time.Duration `mapstructure:"ttl"`
+	}
+
+	// User session config variables.
+	SessionConfig struct {
+		TTL time.Duration `mapstructure:"ttl"`
 	}
 
 	// Database config variables.
@@ -150,6 +168,10 @@ func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("code", &cfg.Code); err != nil {
 		return err
 	}
+	// Unmarshal auth keys.
+	if err := viper.UnmarshalKey("auth", &cfg.Auth); err != nil {
+		return err
+	}
 	// Unmarshal postgres database keys.
 	if err := viper.UnmarshalKey("database", &cfg.Database); err != nil {
 		return err
@@ -171,4 +193,7 @@ func setFromEnv(cfg *Config) {
 
 	// Redis database configurations.
 	cfg.Database.Redis.URL = os.Getenv("REDIS_URL")
+
+	// Auth variables.
+	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }

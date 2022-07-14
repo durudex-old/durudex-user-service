@@ -35,6 +35,12 @@ code:
   max-length: 999999
   min-length: 100000
 
+auth:
+  jwt:
+    ttl: "15m"
+  session:
+    ttl: "720h"
+
 service:
   email:
     addr: "email.service.durudex.local:8002"

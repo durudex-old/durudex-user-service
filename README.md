@@ -37,6 +37,9 @@ POSTGRES_URL=postgresql://admin:qwerty@user.postgres.durudex.local:5432/durudex
 
 # Redis database variables:
 REDIS_URL=redis://user.redis.durudex.local:6379
+
+# Auth variables:
+JWT_SIGNING_KEY=secret-key
 ```
 2) Generate certificates, information can be found at [certs/README.md](certs/README.md)
 3) Migrate the database using `make migrate-up`.
