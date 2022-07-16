@@ -104,12 +104,27 @@ func (s *AuthService) SignIn(ctx context.Context, username, password, ip string)
 	return tokens, nil
 }
 
+// User Sign Out.
 func (s *AuthService) SignOut(ctx context.Context, token, ip string) error {
-	return nil
+	// Deleting a user session by refresh token and ip address.
+	return s.session.Delete(ctx, token, ip)
 }
 
+// Refresh user session access token.
 func (s *AuthService) RefreshTokens(ctx context.Context, token, ip string) (string, error) {
-	return "", nil
+	// Getting a user id in session by refresh token and ip address.
+	id, err := s.session.GetUserId(ctx, token, ip)
+	if err != nil {
+		return "", err
+	}
+
+	// Generating a new jwt access token.
+	accessToken, err := auth.GenerateAccessToken(id.String(), s.cfg.JWT.SigningKey, s.cfg.JWT.TTL)
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
 }
 
 // Creating a new user session.

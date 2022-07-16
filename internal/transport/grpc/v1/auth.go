@@ -56,6 +56,7 @@ func (h *AuthHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpReques
 
 // User Sign In gRPC handler.
 func (h *AuthHandler) UserSignIn(ctx context.Context, input *v1.UserSignInRequest) (*v1.UserSignInResponse, error) {
+	// User Sign In.
 	tokens, err := h.service.SignIn(ctx, input.Username, input.Password, input.Ip)
 	if err != nil {
 		return &v1.UserSignInResponse{}, err
@@ -64,10 +65,23 @@ func (h *AuthHandler) UserSignIn(ctx context.Context, input *v1.UserSignInReques
 	return &v1.UserSignInResponse{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
+// User Sign Out gRPC handler.
 func (h *AuthHandler) UserSignOut(ctx context.Context, input *v1.UserSignOutRequest) (*v1.UserSignOutResponse, error) {
+	// User Sign Out.
+	if err := h.service.SignOut(ctx, input.Refresh, input.Ip); err != nil {
+		return &v1.UserSignOutResponse{}, err
+	}
+
 	return &v1.UserSignOutResponse{}, nil
 }
 
+// User Refresh token gRPC handler.
 func (h *AuthHandler) RefreshUserToken(ctx context.Context, input *v1.RefreshUserTokenRequest) (*v1.RefreshUserTokenResponse, error) {
-	return &v1.RefreshUserTokenResponse{}, nil
+	// Refresh user token.
+	access, err := h.service.RefreshTokens(ctx, input.Refresh, input.Ip)
+	if err != nil {
+		return &v1.RefreshUserTokenResponse{}, err
+	}
+
+	return &v1.RefreshUserTokenResponse{Access: access}, nil
 }
