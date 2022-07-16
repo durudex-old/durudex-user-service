@@ -22,8 +22,6 @@ import (
 	"os"
 
 	"github.com/jackc/pgconn"
-	"github.com/jackc/pgtype"
-	pgtypeuuid "github.com/jackc/pgtype/ext/gofrs-uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/log/zerologadapter"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -56,17 +54,6 @@ func (c *PostgresConfig) Configure(cfg *pgxpool.Config) {
 	// Set max and min postgres driver connections.
 	cfg.MaxConns = c.MaxConns
 	cfg.MinConns = c.MinConns
-
-	cfg.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		// Register custom types.
-		conn.ConnInfo().RegisterDataType(pgtype.DataType{
-			Value: &pgtypeuuid.UUID{},
-			Name:  "uuid",
-			OID:   pgtype.UUIDOID,
-		})
-
-		return nil
-	}
 }
 
 // Creating a new postgres pool connection.
