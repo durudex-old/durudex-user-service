@@ -31,14 +31,13 @@ import (
 
 // User gRPC handler.
 type UserHandler struct {
-	service *service.Service
-	email   v1.EmailServiceClient
+	service service.User
 	v1.UnimplementedUserServiceServer
 }
 
 // Creating a new user gRPC handler.
-func NewUserHandler(service *service.Service, email v1.EmailServiceClient) *UserHandler {
-	return &UserHandler{service: service, email: email}
+func NewUserHandler(service service.User) *UserHandler {
+	return &UserHandler{service: service}
 }
 
 // Getting user by id.
@@ -50,7 +49,7 @@ func (h *UserHandler) GetUserById(ctx context.Context, input *v1.GetUserByIdRequ
 	}
 
 	// Getting user by id.
-	user, err := h.service.User.GetByID(ctx, id)
+	user, err := h.service.GetByID(ctx, id)
 	if err != nil {
 		return &v1.GetUserByIdResponse{}, err
 	}
@@ -66,7 +65,7 @@ func (h *UserHandler) GetUserById(ctx context.Context, input *v1.GetUserByIdRequ
 // Getting user by credentials.
 func (h *UserHandler) GetUserByCreds(ctx context.Context, input *v1.GetUserByCredsRequest) (*v1.GetUserByCredsResponse, error) {
 	// Getting user by credentials.
-	user, err := h.service.User.GetByCreds(ctx, input.Username, input.Password)
+	user, err := h.service.GetByCreds(ctx, input.Username, input.Password)
 	if err != nil {
 		return &v1.GetUserByCredsResponse{}, err
 	}
@@ -82,15 +81,8 @@ func (h *UserHandler) GetUserByCreds(ctx context.Context, input *v1.GetUserByCre
 
 // Forgot user password.
 func (h *UserHandler) ForgotUserPassword(ctx context.Context, input *v1.ForgotUserPasswordRequest) (*v1.ForgotUserPasswordResponse, error) {
-	// Verify email code.
-	verify, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil || !verify {
-		return &v1.ForgotUserPasswordResponse{}, err
-	}
-
 	// Forgot user password.
-	err = h.service.User.ForgotPassword(ctx, input.Password, input.Email)
-	if err != nil {
+	if err := h.service.ForgotPassword(ctx, input.Password, input.Email, input.Code); err != nil {
 		return &v1.ForgotUserPasswordResponse{}, err
 	}
 
@@ -99,36 +91,4 @@ func (h *UserHandler) ForgotUserPassword(ctx context.Context, input *v1.ForgotUs
 
 func (h *UserHandler) UpdateUserAvatar(ctx context.Context, input *v1.UpdateUserAvatarRequest) (*v1.UpdateUserAvatarResponse, error) {
 	return &v1.UpdateUserAvatarResponse{}, nil
-}
-
-// Creating a new user verification email code.
-func (h *UserHandler) CreateVerifyUserEmailCode(ctx context.Context, input *v1.CreateVerifyUserEmailCodeRequest) (*v1.CreateVerifyUserEmailCodeResponse, error) {
-	// Create a new user verification email code.
-	code, err := h.service.Code.CreateVerifyEmailCode(ctx, input.Email)
-	if err != nil {
-		return &v1.CreateVerifyUserEmailCodeResponse{}, err
-	}
-
-	// Sending a verification email code.
-	_, err = h.email.SendEmailUserCode(ctx, &v1.SendEmailUserCodeRequest{
-		Email:    input.Email,
-		Username: "new user",
-		Code:     code,
-	})
-	if err != nil {
-		return &v1.CreateVerifyUserEmailCodeResponse{}, err
-	}
-
-	return &v1.CreateVerifyUserEmailCodeResponse{}, nil
-}
-
-// Verifying user email code.
-func (h *UserHandler) VerifyUserEmailCode(ctx context.Context, input *v1.VerifyUserEmailCodeRequest) (*v1.VerifyUserEmailCodeResponse, error) {
-	// Verifying user email code.
-	status, err := h.service.Code.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
-		return &v1.VerifyUserEmailCodeResponse{}, err
-	}
-
-	return &v1.VerifyUserEmailCodeResponse{Status: status}, nil
 }

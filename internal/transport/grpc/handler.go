@@ -26,20 +26,14 @@ import (
 )
 
 // gRPC server handler structure.
-type Handler struct {
-	service *service.Service
-	client  *Client
-}
+type Handler struct{ service *service.Service }
 
 // Creating a new gRPC handler.
 func NewHandler(service *service.Service, cfg config.ServiceConfig) *Handler {
-	// Creating a new gRPC client.
-	client := NewClient(cfg)
-
-	return &Handler{service: service, client: client}
+	return &Handler{service: service}
 }
 
 // Registering gRPC version handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	v1.NewHandler(h.service, h.client.Email).RegisterHandlers(srv)
+	v1.NewHandler(h.service).RegisterHandlers(srv)
 }

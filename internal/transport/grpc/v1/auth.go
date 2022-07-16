@@ -29,43 +29,39 @@ import (
 
 // User auth gRPC handler.
 type AuthHandler struct {
-	auth  service.Auth
-	email v1.EmailServiceClient
+	service service.Auth
 	v1.UnimplementedUserAuthServiceServer
 }
 
 // Creating a new user auth gRPC handler.
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
+func NewAuthHandler(service service.Auth) *AuthHandler {
+	return &AuthHandler{service: service}
 }
 
 // User Sign Up gRPC handler.
 func (h *AuthHandler) UserSignUp(ctx context.Context, input *v1.UserSignUpRequest) (*v1.UserSignUpResponse, error) {
 	// User Sign Up.
-	tokens, err := h.auth.SignUp(ctx, domain.User{
+	tokens, err := h.service.SignUp(ctx, domain.User{
 		Id:       ksuid.New(),
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
 	}, input.Code, input.Ip)
 	if err != nil {
-		return nil, err
-	}
-
-	// Send registration email.
-	_, err = h.email.SendEmailUserRegister(ctx, &v1.SendEmailUserRegisterRequest{
-		Email:    input.Email,
-		Username: input.Username,
-	})
-	if err != nil {
-		return nil, err
+		return &v1.UserSignUpResponse{}, err
 	}
 
 	return &v1.UserSignUpResponse{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
+// User Sign In gRPC handler.
 func (h *AuthHandler) UserSignIn(ctx context.Context, input *v1.UserSignInRequest) (*v1.UserSignInResponse, error) {
-	return &v1.UserSignInResponse{}, nil
+	tokens, err := h.service.SignIn(ctx, input.Username, input.Password, input.Ip)
+	if err != nil {
+		return &v1.UserSignInResponse{}, err
+	}
+
+	return &v1.UserSignInResponse{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
 func (h *AuthHandler) UserSignOut(ctx context.Context, input *v1.UserSignOutRequest) (*v1.UserSignOutResponse, error) {

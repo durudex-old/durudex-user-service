@@ -51,12 +51,14 @@ migrate-down:
 buf: buf-lint
 	buf generate proto/src/api --path proto/src/api/durudex/v1/user.proto
 	buf generate proto/src/api --path proto/src/api/durudex/v1/user_auth.proto
+	buf generate proto/src/api --path proto/src/api/durudex/v1/user_code.proto
 	buf generate proto/src/api --path proto/src/api/durudex/v1/email.proto
 
 .PHONY: buf-lint
 buf-lint:
 	buf lint proto/src/api/durudex/v1/user.proto
 	buf lint proto/src/api/durudex/v1/user_auth.proto
+	buf lint proto/src/api/durudex/v1/user_code.proto
 	buf lint proto/src/api/durudex/v1/email.proto
 
 .DEFAULT_GOAL := run

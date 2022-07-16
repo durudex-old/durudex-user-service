@@ -33,19 +33,20 @@ type User interface {
 	Create(ctx context.Context, user domain.User) (ksuid.KSUID, error)
 	GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error)
 	GetByCreds(ctx context.Context, username, password string) (domain.User, error)
-	ForgotPassword(ctx context.Context, password, email string) error
+	ForgotPassword(ctx context.Context, password, email string, code uint64) error
 	UpdateAvatar(ctx context.Context, id ksuid.KSUID, avatarUrl string) error
 }
 
 // User service structure.
 type UserService struct {
 	repos postgres.User
+	code  Code
 	cfg   *config.PasswordConfig
 }
 
 // Creating a new user service.
-func NewUserService(repos postgres.User, cfg *config.PasswordConfig) *UserService {
-	return &UserService{repos: repos, cfg: cfg}
+func NewUserService(repos postgres.User, code Code, cfg *config.PasswordConfig) *UserService {
+	return &UserService{repos: repos, code: code, cfg: cfg}
 }
 
 // Creating a new user.
@@ -99,7 +100,13 @@ func (s *UserService) GetByCreds(ctx context.Context, username, password string)
 }
 
 // Forgot user password.
-func (s *UserService) ForgotPassword(ctx context.Context, password, email string) error {
+func (s *UserService) ForgotPassword(ctx context.Context, password, email string, code uint64) error {
+	// Verify email code.
+	verify, err := s.code.VerifyEmailCode(ctx, email, code)
+	if err != nil || !verify {
+		return err
+	}
+
 	// Check user password.
 	if !domain.RxPassword.MatchString(password) {
 		return &domain.Error{Code: domain.CodeInvalidArgument, Message: "Invalid Password"}

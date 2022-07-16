@@ -20,6 +20,7 @@ package service
 import (
 	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/repository"
+	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 )
 
 // Service structure.
@@ -30,12 +31,19 @@ type Service struct {
 }
 
 // Creating a new service.
-func NewService(repos *repository.Repository, config *config.Config) *Service {
-	userService := NewUserService(repos.Postgres.User, &config.Password)
+func NewService(repos *repository.Repository, config *config.Config, email v1.EmailServiceClient) *Service {
+	codeService := NewCodeService(repos.Redis, email, &config.Code)
+	userService := NewUserService(repos.Postgres.User, codeService, &config.Password)
 
 	return &Service{
 		User: userService,
-		Auth: NewAuthService(userService, repos.Postgres.Session, &config.Auth),
-		Code: NewCodeService(repos.Redis, &config.Code),
+		Auth: &AuthService{
+			user:    userService,
+			code:    codeService,
+			email:   email,
+			session: repos.Postgres.Session,
+			cfg:     &config.Auth,
+		},
+		Code: codeService,
 	}
 }

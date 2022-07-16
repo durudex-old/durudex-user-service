@@ -26,10 +26,6 @@ type UserServiceClient interface {
 	ForgotUserPassword(ctx context.Context, in *ForgotUserPasswordRequest, opts ...grpc.CallOption) (*ForgotUserPasswordResponse, error)
 	// Updating a user avatar.
 	UpdateUserAvatar(ctx context.Context, in *UpdateUserAvatarRequest, opts ...grpc.CallOption) (*UpdateUserAvatarResponse, error)
-	// Creatinf a new user verification code.
-	CreateVerifyUserEmailCode(ctx context.Context, in *CreateVerifyUserEmailCodeRequest, opts ...grpc.CallOption) (*CreateVerifyUserEmailCodeResponse, error)
-	// Verifying a user email code.
-	VerifyUserEmailCode(ctx context.Context, in *VerifyUserEmailCodeRequest, opts ...grpc.CallOption) (*VerifyUserEmailCodeResponse, error)
 }
 
 type userServiceClient struct {
@@ -76,24 +72,6 @@ func (c *userServiceClient) UpdateUserAvatar(ctx context.Context, in *UpdateUser
 	return out, nil
 }
 
-func (c *userServiceClient) CreateVerifyUserEmailCode(ctx context.Context, in *CreateVerifyUserEmailCodeRequest, opts ...grpc.CallOption) (*CreateVerifyUserEmailCodeResponse, error) {
-	out := new(CreateVerifyUserEmailCodeResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.UserService/CreateVerifyUserEmailCode", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) VerifyUserEmailCode(ctx context.Context, in *VerifyUserEmailCodeRequest, opts ...grpc.CallOption) (*VerifyUserEmailCodeResponse, error) {
-	out := new(VerifyUserEmailCodeResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.UserService/VerifyUserEmailCode", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -106,10 +84,6 @@ type UserServiceServer interface {
 	ForgotUserPassword(context.Context, *ForgotUserPasswordRequest) (*ForgotUserPasswordResponse, error)
 	// Updating a user avatar.
 	UpdateUserAvatar(context.Context, *UpdateUserAvatarRequest) (*UpdateUserAvatarResponse, error)
-	// Creatinf a new user verification code.
-	CreateVerifyUserEmailCode(context.Context, *CreateVerifyUserEmailCodeRequest) (*CreateVerifyUserEmailCodeResponse, error)
-	// Verifying a user email code.
-	VerifyUserEmailCode(context.Context, *VerifyUserEmailCodeRequest) (*VerifyUserEmailCodeResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -128,12 +102,6 @@ func (UnimplementedUserServiceServer) ForgotUserPassword(context.Context, *Forgo
 }
 func (UnimplementedUserServiceServer) UpdateUserAvatar(context.Context, *UpdateUserAvatarRequest) (*UpdateUserAvatarResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserAvatar not implemented")
-}
-func (UnimplementedUserServiceServer) CreateVerifyUserEmailCode(context.Context, *CreateVerifyUserEmailCodeRequest) (*CreateVerifyUserEmailCodeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVerifyUserEmailCode not implemented")
-}
-func (UnimplementedUserServiceServer) VerifyUserEmailCode(context.Context, *VerifyUserEmailCodeRequest) (*VerifyUserEmailCodeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyUserEmailCode not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -220,42 +188,6 @@ func _UserService_UpdateUserAvatar_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_CreateVerifyUserEmailCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateVerifyUserEmailCodeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).CreateVerifyUserEmailCode(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/durudex.v1.UserService/CreateVerifyUserEmailCode",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CreateVerifyUserEmailCode(ctx, req.(*CreateVerifyUserEmailCodeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_VerifyUserEmailCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyUserEmailCodeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).VerifyUserEmailCode(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/durudex.v1.UserService/VerifyUserEmailCode",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).VerifyUserEmailCode(ctx, req.(*VerifyUserEmailCodeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,14 +210,6 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserAvatar",
 			Handler:    _UserService_UpdateUserAvatar_Handler,
-		},
-		{
-			MethodName: "CreateVerifyUserEmailCode",
-			Handler:    _UserService_CreateVerifyUserEmailCode_Handler,
-		},
-		{
-			MethodName: "VerifyUserEmailCode",
-			Handler:    _UserService_VerifyUserEmailCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

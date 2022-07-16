@@ -24,39 +24,51 @@ import (
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/redis"
 	"github.com/durudex/durudex-user-service/pkg/crypto/rand"
+	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 )
 
 // Code service interface.
 type Code interface {
-	CreateVerifyEmailCode(ctx context.Context, email string) (uint64, error)
+	CreateVerifyEmailCode(ctx context.Context, email string) error
 	VerifyEmailCode(ctx context.Context, email string, input uint64) (bool, error)
 }
 
 // Code service structure.
 type CodeService struct {
-	repos  redis.Code
-	config *config.CodeConfig
+	repos redis.Code
+	email v1.EmailServiceClient
+	cfg   *config.CodeConfig
 }
 
 // Creating a new code service.
-func NewCodeService(repos redis.Code, config *config.CodeConfig) *CodeService {
-	return &CodeService{repos: repos, config: config}
+func NewCodeService(repos redis.Code, email v1.EmailServiceClient, cfg *config.CodeConfig) *CodeService {
+	return &CodeService{repos: repos, email: email, cfg: cfg}
 }
 
 // Creating a new user verification email code.
-func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) (uint64, error) {
+func (s *CodeService) CreateVerifyEmailCode(ctx context.Context, email string) error {
 	// Generate random code.
-	code, err := rand.Generate(s.config.MaxLength, s.config.MinLength)
+	code, err := rand.Generate(s.cfg.MaxLength, s.cfg.MinLength)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// Creating a new code.
-	if err := s.repos.CreateByEmail(ctx, email, code, s.config.TTL); err != nil {
-		return 0, err
+	if err := s.repos.CreateByEmail(ctx, email, code, s.cfg.TTL); err != nil {
+		return err
 	}
 
-	return code, nil
+	// Sending an email to a user with a verification code.
+	_, err = s.email.SendEmailUserCode(ctx, &v1.SendEmailUserCodeRequest{
+		Email:    email,
+		Username: "new user",
+		Code:     code,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Verifying a user verification email code.

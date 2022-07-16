@@ -49,10 +49,12 @@ func main() {
 		log.Error().Err(err).Msg("error initialize config")
 	}
 
+	// Creating a new gRPC client.
+	client := grpc.NewClient(cfg.Service)
 	// Creating a new repository.
 	repos := repository.NewRepository(cfg.Database)
 	// Creating a new service.
-	service := service.NewService(repos, cfg)
+	service := service.NewService(repos, cfg, client.Email)
 	// Creating a new gRPC handler.
 	handler := grpc.NewHandler(service, cfg.Service)
 

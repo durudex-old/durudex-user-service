@@ -25,18 +25,19 @@ import (
 )
 
 // gRPC handler structure.
-type Handler struct {
-	service *service.Service
-	email   v1.EmailServiceClient
-}
+type Handler struct{ service *service.Service }
 
 // Creating a new gRPC handler.
-func NewHandler(service *service.Service, email v1.EmailServiceClient) *Handler {
-	return &Handler{service: service, email: email}
+func NewHandler(service *service.Service) *Handler {
+	return &Handler{service: service}
 }
 
 // Registering gRPC handlers.
 func (h *Handler) RegisterHandlers(srv *grpc.Server) {
-	v1.RegisterUserServiceServer(srv, NewUserHandler(h.service, h.email))
-	v1.RegisterUserAuthServiceServer(srv, NewAuthHandler())
+	// Register user gRPC handler.
+	v1.RegisterUserServiceServer(srv, NewUserHandler(h.service))
+	// Register user auth gRPC handler.
+	v1.RegisterUserAuthServiceServer(srv, NewAuthHandler(h.service))
+	// Register user code gRPC handler.
+	v1.RegisterUserCodeServiceServer(srv, NewCodeHandler(h.service))
 }

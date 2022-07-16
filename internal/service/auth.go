@@ -25,6 +25,7 @@ import (
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 	"github.com/durudex/durudex-user-service/pkg/auth"
+	v1 "github.com/durudex/durudex-user-service/pkg/pb/durudex/v1"
 
 	"github.com/segmentio/ksuid"
 )
@@ -32,7 +33,7 @@ import (
 // Auth service interface.
 type Auth interface {
 	SignUp(ctx context.Context, user domain.User, code uint64, ip string) (domain.Tokens, error)
-	SignIn(ctx context.Context, username, password string) (domain.Tokens, error)
+	SignIn(ctx context.Context, username, password, ip string) (domain.Tokens, error)
 	SignOut(ctx context.Context, token, ip string) error
 	RefreshTokens(ctx context.Context, token, ip string) (string, error)
 	CreateSession(ctx context.Context, id ksuid.KSUID, ip string) (domain.Tokens, error)
@@ -42,13 +43,9 @@ type Auth interface {
 type AuthService struct {
 	user    User
 	code    Code
+	email   v1.EmailServiceClient
 	session postgres.Session
 	cfg     *config.AuthConfig
-}
-
-// Creating a new auth service.
-func NewAuthService(user User, session postgres.Session, cfg *config.AuthConfig) *AuthService {
-	return &AuthService{user: user, session: session, cfg: cfg}
 }
 
 // User Sign Up.
@@ -66,11 +63,45 @@ func (s *AuthService) SignUp(ctx context.Context, user domain.User, code uint64,
 	}
 
 	// Creating a new user session.
-	return s.CreateSession(ctx, id, ip)
+	tokens, err := s.CreateSession(ctx, id, ip)
+	if err != nil {
+		return domain.Tokens{}, err
+	}
+
+	// Sending an email to a user with register.
+	if _, err := s.email.SendEmailUserRegister(ctx, &v1.SendEmailUserRegisterRequest{
+		Email:    user.Email,
+		Username: user.Username,
+	}); err != nil {
+		return domain.Tokens{}, err
+	}
+
+	return tokens, nil
 }
 
-func (s *AuthService) SignIn(ctx context.Context, username, password string) (domain.Tokens, error) {
-	return domain.Tokens{}, nil
+// User Sign In.
+func (s *AuthService) SignIn(ctx context.Context, username, password, ip string) (domain.Tokens, error) {
+	// Getting a user by credentials.
+	user, err := s.user.GetByCreds(ctx, username, password)
+	if err != nil {
+		return domain.Tokens{}, err
+	}
+
+	// Creating a new user session.
+	tokens, err := s.CreateSession(ctx, user.Id, ip)
+	if err != nil {
+		return domain.Tokens{}, err
+	}
+
+	// Sending an email to a user with logged in.
+	if _, err := s.email.SendEmailUserLoggedIn(ctx, &v1.SendEmailUserLoggedInRequest{
+		Email: user.Email,
+		Ip:    ip,
+	}); err != nil {
+		return domain.Tokens{}, err
+	}
+
+	return tokens, nil
 }
 
 func (s *AuthService) SignOut(ctx context.Context, token, ip string) error {
