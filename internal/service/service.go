@@ -31,7 +31,7 @@ type Service struct {
 }
 
 // Creating a new service.
-func NewService(repos *repository.Repository, config *config.Config, email v1.EmailServiceClient) *Service {
+func NewService(repos *repository.Repository, config *config.Config, email v1.EmailUserServiceClient) *Service {
 	codeService := NewCodeService(repos.Redis, email, &config.Code)
 	userService := NewUserService(repos.Postgres.User, codeService, &config.Password)
 

@@ -36,12 +36,12 @@ type Code interface {
 // Code service structure.
 type CodeService struct {
 	repos redis.Code
-	email v1.EmailServiceClient
+	email v1.EmailUserServiceClient
 	cfg   *config.CodeConfig
 }
 
 // Creating a new code service.
-func NewCodeService(repos redis.Code, email v1.EmailServiceClient, cfg *config.CodeConfig) *CodeService {
+func NewCodeService(repos redis.Code, email v1.EmailUserServiceClient, cfg *config.CodeConfig) *CodeService {
 	return &CodeService{repos: repos, email: email, cfg: cfg}
 }
 

@@ -29,11 +29,11 @@ import (
 )
 
 // gRPC client structure.
-type Client struct{ Email v1.EmailServiceClient }
+type Client struct{ Email v1.EmailUserServiceClient }
 
 // Creating a new gRPC client.
 func NewClient(cfg config.ServiceConfig) *Client {
-	return &Client{Email: v1.NewEmailServiceClient(connectToService(cfg.Email))}
+	return &Client{Email: v1.NewEmailUserServiceClient(connectToService(cfg.Email))}
 }
 
 // Connection to the gRPC server.

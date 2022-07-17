@@ -43,7 +43,7 @@ type Auth interface {
 type AuthService struct {
 	user    User
 	code    Code
-	email   v1.EmailServiceClient
+	email   v1.EmailUserServiceClient
 	session postgres.Session
 	cfg     *config.AuthConfig
 }

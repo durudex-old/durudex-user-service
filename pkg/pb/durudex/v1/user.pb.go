@@ -32,7 +32,7 @@ type GetUserByIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// User uuid.
+	// User ksuid.
 	Id []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
@@ -215,7 +215,7 @@ type GetUserByCredsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// User uuid.
+	// User ksuid.
 	Id []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// User email address.
 	Email string `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
@@ -406,7 +406,7 @@ type UpdateUserAvatarRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// User uuid.
+	// User ksuid.
 	Id []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// User avatar url.
 	AvatarUrl string `protobuf:"bytes,2,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
