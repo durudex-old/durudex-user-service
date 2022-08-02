@@ -68,8 +68,8 @@ func TestSessionRepository_Create(t *testing.T) {
 			mockBehavior: func(args args) {
 				query := fmt.Sprintf(`INSERT INTO "%s"`, postgres.SessionTable)
 				mock.ExpectExec(query).
-					WithArgs(args.session.Id.String(), args.session.UserId.String(),
-						args.session.RefreshToken, args.session.Ip, args.session.ExpiresIn).
+					WithArgs(args.session.Id, args.session.UserId, args.session.RefreshToken,
+						args.session.Ip, args.session.ExpiresIn).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
 		},

@@ -44,7 +44,7 @@ func TestUserRepository_Create(t *testing.T) {
 	type args struct{ user domain.User }
 
 	// Test behavior.
-	type mockBehavior func(args args, id ksuid.KSUID)
+	type mockBehavior func(args args)
 
 	// Creating a new repository.
 	repos := postgres.NewUserRepository(mock)
@@ -53,22 +53,21 @@ func TestUserRepository_Create(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         args
-		want         ksuid.KSUID
 		wantErr      bool
 		mockBehavior mockBehavior
 	}{
 		{
 			name: "OK",
 			args: args{user: domain.User{
+				Id:       ksuid.New(),
 				Username: "example",
 				Email:    "example@durudex.com",
 				Password: "qwerty",
 			}},
-			want: ksuid.New(),
-			mockBehavior: func(args args, want ksuid.KSUID) {
-				mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, postgres.UserTable)).
-					WithArgs(args.user.Username, args.user.Email, args.user.Password).
-					WillReturnRows(mock.NewRows([]string{"id"}).AddRow(want.String()))
+			mockBehavior: func(args args) {
+				mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, postgres.UserTable)).
+					WithArgs(args.user.Id, args.user.Username, args.user.Email, args.user.Password).
+					WillReturnResult(pgxmock.NewResult("", 1))
 			},
 		},
 	}
@@ -76,17 +75,12 @@ func TestUserRepository_Create(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.mockBehavior(tt.args, tt.want)
+			tt.mockBehavior(tt.args)
 
 			// Creating a new user in postgres database.
-			got, err := repos.Create(context.Background(), tt.args.user)
+			err := repos.Create(context.Background(), tt.args.user)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error creating user: %s", err.Error())
-			}
-
-			// Check for similarity of id.
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Error("error id are not similar")
 			}
 		})
 	}
@@ -133,7 +127,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 				}).AddRow(user.Username, user.LastVisit, user.Verified, user.AvatarUrl)
 
 				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
-					WithArgs(args.id.String()).
+					WithArgs(args.id).
 					WillReturnRows(rows)
 			},
 		},
@@ -313,7 +307,7 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 			},
 			mockBehavior: func(args args) {
 				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
-					WithArgs(args.avatarUrl, args.id.String()).
+					WithArgs(args.avatarUrl, args.id).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
 		},

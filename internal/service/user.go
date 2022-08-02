@@ -51,25 +51,31 @@ func NewUserService(repos postgres.User, code Code, cfg *config.PasswordConfig) 
 
 // Creating a new user.
 func (s *UserService) Create(ctx context.Context, user domain.User) (ksuid.KSUID, error) {
+	var err error
+
 	// Validate user.
 	if err := user.Validate(); err != nil {
 		return ksuid.Nil, err
 	}
 
-	// Hashing user password.
-	hashPassword, err := hash.Hash(user.Password, s.cfg.Cost)
+	// Generating a random user id.
+	user.Id, err = ksuid.NewRandom()
 	if err != nil {
 		return ksuid.Nil, err
 	}
-	user.Password = hashPassword
+
+	// Hashing user password.
+	user.Password, err = hash.Hash(user.Password, s.cfg.Cost)
+	if err != nil {
+		return ksuid.Nil, err
+	}
 
 	// Creating a new user in postgres database.
-	id, err := s.repos.Create(ctx, user)
-	if err != nil {
+	if err := s.repos.Create(ctx, user); err != nil {
 		return ksuid.Nil, err
 	}
 
-	return id, nil
+	return user.Id, nil
 }
 
 // Getting user by id.

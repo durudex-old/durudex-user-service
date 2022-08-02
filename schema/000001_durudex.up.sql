@@ -30,5 +30,5 @@ CREATE TABLE IF NOT EXISTS "user_session" (
   "user_id"       CHAR(27)    NOT NULL,
   "refresh_token" VARCHAR(64) NOT NULL,
   "ip"            INET        NOT NULL,
-  "expires_in"    TIMESTAMP   NOT NULL,
+  "expires_in"    TIMESTAMP   NOT NULL
 );

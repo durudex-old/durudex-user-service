@@ -36,7 +36,7 @@ const UserTable string = "user"
 
 // User repository interface.
 type User interface {
-	Create(ctx context.Context, user domain.User) (ksuid.KSUID, error)
+	Create(ctx context.Context, user domain.User) error
 	GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error)
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
 	ForgotPassword(ctx context.Context, password, email string) error
@@ -52,16 +52,12 @@ func NewUserRepository(psql postgres.Postgres) *UserRepository {
 }
 
 // Creating a new user in postgres database.
-func (r *UserRepository) Create(ctx context.Context, user domain.User) (ksuid.KSUID, error) {
-	var id string
-
+func (r *UserRepository) Create(ctx context.Context, user domain.User) error {
 	// Query to create user.
-	query := fmt.Sprintf(`INSERT INTO "%s" (username, email, password) VALUES ($1, $2, $3)
-		RETURNING "id"`, UserTable)
+	query := fmt.Sprintf(`INSERT INTO "%s" (id, username, email, password) VALUES ($1, $2, $3, $4)`, UserTable)
 
-	// Query and get user uuid.
-	row := r.psql.QueryRow(ctx, query, user.Username, user.Email, user.Password)
-	if err := row.Scan(&id); err != nil {
+	// Query to create a new user.
+	if _, err := r.psql.Exec(ctx, query, user.Id, user.Username, user.Email, user.Password); err != nil {
 		var pgErr *pgconn.PgError
 
 		// Get postgres error.
@@ -69,14 +65,15 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (ksuid.KS
 			// Switching postgres error code.
 			if pgErr.Code == pgerrcode.UniqueViolation {
 				// Return error if user with same username or email exists.
-				return ksuid.Nil, &domain.Error{Code: domain.CodeAlreadyExists, Message: "User already exists"}
+				return &domain.Error{Code: domain.CodeAlreadyExists, Message: "User already exists"}
 			}
 		}
 
-		return ksuid.Nil, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
+		fmt.Println(err)
+		return &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
 	}
 
-	return ksuid.Parse(id)
+	return nil
 }
 
 // Get user by id in postgres database.
@@ -87,7 +84,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id ksuid.KSUID) (domain.Us
 	query := fmt.Sprintf(`SELECT "username", "last_visit", "verified", "avatar_url"
 		FROM "%s" WHERE "id"=$1`, UserTable)
 
-	row := r.psql.QueryRow(ctx, query, id.String())
+	row := r.psql.QueryRow(ctx, query, id)
 
 	// Scanning query row.
 	err := row.Scan(&user.Username, &user.LastVisit, &user.Verified, &user.AvatarUrl)
@@ -104,19 +101,16 @@ func (r *UserRepository) GetByID(ctx context.Context, id ksuid.KSUID) (domain.Us
 
 // Get user by username in postgres database.
 func (r *UserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
-	var (
-		user domain.User
-		id   string
-	)
+	var user domain.User
 
 	// Query for get user by username.
-	query := fmt.Sprintf(`SELECT "id", "email", "password", "created_at", "last_visit", "verified",
-	"avatar_url" FROM "%s" WHERE username=$1`, UserTable)
+	query := fmt.Sprintf(`SELECT "id", "email", "password", "last_visit", "verified",
+		"avatar_url" FROM "%s" WHERE username=$1`, UserTable)
 
 	row := r.psql.QueryRow(ctx, query, username)
 
 	// Scanning query row.
-	err := row.Scan(&id, &user.Email, &user.Password, &user.LastVisit,
+	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.LastVisit,
 		&user.Verified, &user.AvatarUrl)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -124,12 +118,6 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (do
 		}
 
 		return domain.User{}, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
-	}
-
-	// Parsing user id.
-	user.Id, err = ksuid.Parse(id)
-	if err != nil {
-		return domain.User{}, err
 	}
 
 	return user, nil
@@ -148,7 +136,7 @@ func (r *UserRepository) ForgotPassword(ctx context.Context, password, email str
 func (r *UserRepository) UpdateAvatar(ctx context.Context, avatarUrl string, id ksuid.KSUID) error {
 	// Query to update user avatar.
 	query := fmt.Sprintf(`UPDATE "%s" SET "avatar_url"=$1 WHERE "id"=$2`, UserTable)
-	_, err := r.psql.Exec(ctx, query, avatarUrl, id.String())
+	_, err := r.psql.Exec(ctx, query, avatarUrl, id)
 
 	return err
 }

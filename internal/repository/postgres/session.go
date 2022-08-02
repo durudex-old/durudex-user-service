@@ -50,7 +50,7 @@ func (r *SessionRepository) Create(ctx context.Context, session domain.Session) 
 	// Query to set a new user session in the postgres database.
 	query := fmt.Sprintf(`INSERT INTO "%s" (id, user_id, refresh_token, ip, expires_in)
 		VALUES ($1, $2, $3, $4, $5)`, SessionTable)
-	_, err := r.psql.Exec(ctx, query, session.Id.String(), session.UserId.String(), session.RefreshToken,
+	_, err := r.psql.Exec(ctx, query, session.Id, session.UserId, session.RefreshToken,
 		session.Ip, session.ExpiresIn)
 
 	return err
