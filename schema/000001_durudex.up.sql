@@ -15,20 +15,16 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-CREATE TABLE IF NOT EXISTS "user" (
-  "id"         CHAR(27)     NOT NULL PRIMARY KEY,
-  "username"   VARCHAR(40)  NOT NULL UNIQUE,
-  "email"      VARCHAR(255) NOT NULL UNIQUE,
-  "password"   VARCHAR(100) NOT NULL,
-  "last_visit" TIMESTAMP    NOT NULL DEFAULT now(),
-  "verified"   BOOLEAN      NOT NULL DEFAULT false,
-  "avatar_url" VARCHAR(255)
+CREATE TABLE IF NOT EXISTS users (
+  id             CHAR(27)     NOT NULL,
+  username       VARCHAR(40)  NOT NULL,
+  email          VARCHAR(255) NOT NULL,
+  password_hash  VARCHAR(64)  NOT NULL,
+  password_epoch SMALLINT     NOT NULL
+  verified       BOOLEAN      NOT NULL DEFAULT false,
+  avatar_url     VARCHAR(255),
+  CONSTRAINT users_pkey PRIMARY KEY (id DESC)
 );
 
-CREATE TABLE IF NOT EXISTS "user_session" (
-  "id"            CHAR(27)    NOT NULL PRIMARY KEY,
-  "user_id"       CHAR(27)    NOT NULL,
-  "refresh_token" VARCHAR(64) NOT NULL,
-  "ip"            INET        NOT NULL,
-  "expires_in"    TIMESTAMP   NOT NULL
-);
+CREATE UNIQUE INDEX IF NOT EXISTS users_username_key (username DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_key (email DESC);

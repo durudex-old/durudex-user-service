@@ -15,6 +15,4 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-DROP TABLE "user";
-
-DROP TABLE "user_session";
+DROP TABLE IF EXISTS users;
