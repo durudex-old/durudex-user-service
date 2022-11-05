@@ -19,15 +19,18 @@ package postgres
 
 import (
 	"github.com/durudex/durudex-user-service/internal/config"
-	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+	"github.com/durudex/go-shared/database/postgres"
 
 	"github.com/rs/zerolog/log"
 )
 
 // Postgres repository structure.
 type PostgresRepository struct {
-	User
-	Session
+	// Postgres user repository implementation.
+	User User
+
+	// Postgres database connection.
+	conn postgres.Driver
 }
 
 // Creating a new postgres repository.
@@ -35,7 +38,7 @@ func NewPostgresRepository(cfg config.PostgresConfig) *PostgresRepository {
 	log.Debug().Msg("Creating a new postgres repository")
 
 	// Creating a new postgres pool connection.
-	client, err := postgres.NewPool(&postgres.PostgresConfig{
+	conn, err := postgres.NewPool(&postgres.PoolConfig{
 		URL:      cfg.URL,
 		MaxConns: cfg.MaxConns,
 		MinConns: cfg.MinConns,
@@ -44,8 +47,8 @@ func NewPostgresRepository(cfg config.PostgresConfig) *PostgresRepository {
 		log.Fatal().Err(err).Msg("failed to create postgres client")
 	}
 
-	return &PostgresRepository{
-		User:    NewUserRepository(client),
-		Session: NewSessionRepository(client),
-	}
+	return &PostgresRepository{User: NewUserRepository(conn), conn: conn}
 }
+
+// Closing postgres database connection.
+func (r *PostgresRepository) Close() { r.conn.Close() }

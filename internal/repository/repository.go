@@ -20,19 +20,12 @@ package repository
 import (
 	"github.com/durudex/durudex-user-service/internal/config"
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
-	"github.com/durudex/durudex-user-service/internal/repository/redis"
 )
 
 // Repository structure.
-type Repository struct {
-	Postgres *postgres.PostgresRepository
-	Redis    *redis.RedisRepository
-}
+type Repository struct{ Postgres *postgres.PostgresRepository }
 
 // Creating a new repository.
 func NewRepository(config config.DatabaseConfig) *Repository {
-	return &Repository{
-		Postgres: postgres.NewPostgresRepository(config.Postgres),
-		Redis:    redis.NewRedisRepository(config.Redis),
-	}
+	return &Repository{Postgres: postgres.NewPostgresRepository(config.Postgres)}
 }

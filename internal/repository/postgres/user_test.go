@@ -19,29 +19,27 @@ package postgres_test
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
 	"github.com/durudex/durudex-user-service/internal/repository/postgres"
 
-	"github.com/pashagolub/pgxmock"
+	"github.com/pashagolub/pgxmock/v2"
 	"github.com/segmentio/ksuid"
 )
 
-// Testing creating a new user in postgres database.
+// Testing creating a new user in the database.
 func TestUserRepository_Create(t *testing.T) {
-	// Creating a new mock connection.
-	mock, err := pgxmock.NewConn()
+	// Creating a new mock pool connection.
+	mock, err := pgxmock.NewPool()
 	if err != nil {
-		t.Fatalf("error creating a new mock connection: %s", err.Error())
+		t.Fatalf("error creating a new mock pool connection: %s", err.Error())
 	}
-	defer mock.Close(context.Background())
+	defer mock.Close()
 
 	// Testing args.
-	type args struct{ user domain.User }
+	type args struct{ input domain.CreateUserInput }
 
 	// Test behavior.
 	type mockBehavior func(args args)
@@ -58,15 +56,17 @@ func TestUserRepository_Create(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{user: domain.User{
-				Id:       ksuid.New(),
-				Username: "example",
-				Email:    "example@durudex.com",
-				Password: "qwerty",
+			args: args{input: domain.CreateUserInput{
+				ID:            ksuid.New(),
+				Username:      "example",
+				Email:         "example@durudex.com",
+				PasswordHash:  "91b9b4ddda35be0338407fbaa76bb6adfe2dba8ad6719fe0ebae006c297b529f",
+				PasswordEpoch: 1,
 			}},
 			mockBehavior: func(args args) {
-				mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, postgres.UserTable)).
-					WithArgs(args.user.Id, args.user.Username, args.user.Email, args.user.Password).
+				mock.ExpectExec("INSERT INTO users").
+					WithArgs(args.input.ID, args.input.Username, args.input.Email, args.input.PasswordHash,
+						args.input.PasswordEpoch).
 					WillReturnResult(pgxmock.NewResult("", 1))
 			},
 		},
@@ -77,26 +77,25 @@ func TestUserRepository_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.args)
 
-			// Creating a new user in postgres database.
-			err := repos.Create(context.Background(), tt.args.user)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error creating user: %s", err.Error())
+			// Creating a new user in the database.
+			if err := repos.Create(context.Background(), tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("error creating a new user: %s", err.Error())
 			}
 		})
 	}
 }
 
-// Testing getting user by id in postgres database.
-func TestUserRepository_GetByID(t *testing.T) {
-	// Creating a new mock connection.
-	mock, err := pgxmock.NewConn()
+// Testing getting a user from the database by his ID.
+func TestUserRepository_Get(t *testing.T) {
+	// Creating a new mock pool connection.
+	mock, err := pgxmock.NewPool()
 	if err != nil {
-		t.Fatalf("error creating a new mock connection: %s", err.Error())
+		t.Fatalf("error creating a new mock pool connection: %s", err.Error())
 	}
-	defer mock.Close(context.Background())
+	defer mock.Close()
 
 	// Testing args.
-	type args struct{ id ksuid.KSUID }
+	type args struct{ uid ksuid.KSUID }
 
 	// Test behavior.
 	type mockBehavior func(args args, user domain.User)
@@ -114,20 +113,19 @@ func TestUserRepository_GetByID(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{id: ksuid.New()},
+			args: args{uid: ksuid.New()},
 			want: domain.User{
 				Username:  "example",
-				LastVisit: time.Now(),
 				Verified:  true,
-				AvatarUrl: nil,
+				AvatarURL: nil,
 			},
 			mockBehavior: func(args args, user domain.User) {
 				rows := mock.NewRows([]string{
-					"username", "last_visit", "verified", "avatar_url",
-				}).AddRow(user.Username, user.LastVisit, user.Verified, user.AvatarUrl)
+					"username", "verified", "avatar_url",
+				}).AddRow(user.Username, user.Verified, user.AvatarURL)
 
-				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
-					WithArgs(args.id).
+				mock.ExpectQuery("SELECT (.+) FROM users").
+					WithArgs(args.uid).
 					WillReturnRows(rows)
 			},
 		},
@@ -138,10 +136,10 @@ func TestUserRepository_GetByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.args, tt.want)
 
-			// Getting user by id.
-			got, err := repos.GetByID(context.Background(), tt.args.id)
+			// Getting a user from the database by his ID.
+			got, err := repos.Get(context.Background(), tt.args.uid)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("error getting user by id: %s", err.Error())
+				t.Errorf("error getting user: %s", err.Error())
 			}
 
 			// Check for similarity of user.
@@ -152,142 +150,23 @@ func TestUserRepository_GetByID(t *testing.T) {
 	}
 }
 
-// Testing getting user by username in postgres database.
-func TestUserRepository_GetByUsername(t *testing.T) {
-	// Creating a new mock connection.
-	mock, err := pgxmock.NewConn()
+// Testing getting a user from the database using credentials
+func TestUserRepository_GetByCreds(t *testing.T) {
+	// Creating a new mock pool connection.
+	mock, err := pgxmock.NewPool()
 	if err != nil {
-		t.Fatalf("error creating a new mock connection: %s", err.Error())
+		t.Fatalf("error creating a new mock pool connection: %s", err.Error())
 	}
-	defer mock.Close(context.Background())
-
-	// Testing args.
-	type args struct{ username string }
-
-	// Test behavior.
-	type mockBehavior func(args args, user domain.User)
-
-	// Creating a new repository.
-	repos := postgres.NewUserRepository(mock)
-
-	// Tests structures.
-	tests := []struct {
-		name         string
-		args         args
-		want         domain.User
-		wantErr      bool
-		mockBehavior mockBehavior
-	}{
-		{
-			name: "OK",
-			args: args{username: "example"},
-			want: domain.User{
-				Id:        ksuid.New(),
-				Email:     "example@example.example",
-				Password:  "qwerty123",
-				LastVisit: time.Now(),
-				Verified:  true,
-				AvatarUrl: nil,
-			},
-			mockBehavior: func(args args, user domain.User) {
-				rows := mock.NewRows([]string{
-					"id", "email", "password", "last_visit", "verified", "avatar_url",
-				}).AddRow(user.Id.String(), user.Email, user.Password, user.LastVisit,
-					user.Verified, user.AvatarUrl)
-
-				mock.ExpectQuery(fmt.Sprintf(`SELECT (.+) FROM "%s"`, postgres.UserTable)).
-					WithArgs(args.username).
-					WillReturnRows(rows)
-			},
-		},
-	}
-
-	// Conducting tests in various structures.
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mockBehavior(tt.args, tt.want)
-
-			// Getting user by username.
-			got, err := repos.GetByUsername(context.Background(), tt.args.username)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error getting user by username: %s", err.Error())
-			}
-
-			// Check for similarity of user.
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Error("error user are not similar")
-			}
-		})
-	}
-}
-
-// Testing forgot password in postgres database.
-func TestUserRepository_ForgotPassword(t *testing.T) {
-	// Creating a new mock connection.
-	mock, err := pgxmock.NewConn()
-	if err != nil {
-		t.Fatalf("error creating a new mock connection: %s", err.Error())
-	}
-	defer mock.Close(context.Background())
-
-	// Testing args.
-	type args struct{ email, password string }
-
-	// Test behavior.
-	type mockBehavior func(args args)
-
-	// Creating a new repository.
-	repos := postgres.NewUserRepository(mock)
-
-	// Tests structures.
-	tests := []struct {
-		name         string
-		args         args
-		wantErr      bool
-		mockBehavior mockBehavior
-	}{
-		{
-			name: "OK",
-			args: args{email: "example@example.example", password: "qwerty"},
-			mockBehavior: func(args args) {
-				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
-					WithArgs(args.password, args.email).
-					WillReturnResult(pgxmock.NewResult("", 1))
-			},
-		},
-	}
-
-	// Conducting tests in various structures.
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mockBehavior(tt.args)
-
-			// Forgot password in postgres database.
-			err := repos.ForgotPassword(context.Background(), tt.args.password, tt.args.email)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error forgot user password: %s", err.Error())
-			}
-		})
-	}
-}
-
-// Testing update user in postgres database.
-func TestUserRepository_UpdateAvatar(t *testing.T) {
-	// Creating a new mock connection.
-	mock, err := pgxmock.NewConn()
-	if err != nil {
-		t.Fatalf("error creating a new mock connection: %s", err.Error())
-	}
-	defer mock.Close(context.Background())
+	defer mock.Close()
 
 	// Testing args.
 	type args struct {
-		avatarUrl string
-		id        ksuid.KSUID
+		key   domain.CredentialKey
+		value string
 	}
 
 	// Test behavior.
-	type mockBehavior func(args args)
+	type mockBehavior func(args args, user domain.User)
 
 	// Creating a new repository.
 	repos := postgres.NewUserRepository(mock)
@@ -296,19 +175,32 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         args
+		want         domain.User
 		wantErr      bool
 		mockBehavior mockBehavior
 	}{
 		{
 			name: "OK",
-			args: args{
-				avatarUrl: "https://cdn.durudex.com/avatar/0ujzPyRiIAffKhBux4PvQdDqMHY/user.png",
-				id:        ksuid.New(),
+			args: args{key: domain.UsernameCredential, value: "example"},
+			want: domain.User{
+				ID:            ksuid.New(),
+				Username:      "example",
+				Email:         "example@durudex.com",
+				PasswordHash:  "91b9b4ddda35be0338407fbaa76bb6adfe2dba8ad6719fe0ebae006c297b529f",
+				PasswordEpoch: 1,
+				Verified:      true,
+				AvatarURL:     nil,
 			},
-			mockBehavior: func(args args) {
-				mock.ExpectExec(fmt.Sprintf(`UPDATE "%s"`, postgres.UserTable)).
-					WithArgs(args.avatarUrl, args.id).
-					WillReturnResult(pgxmock.NewResult("", 1))
+			mockBehavior: func(args args, user domain.User) {
+				rows := mock.NewRows([]string{
+					"id", "username", "email", "password_hash",
+					"password_epoch", "verified", "avatar_url",
+				}).AddRow(user.ID, user.Username, user.Email, user.PasswordHash,
+					user.PasswordEpoch, user.Verified, user.AvatarURL)
+
+				mock.ExpectQuery("SELECT (.+) FROM users").
+					WithArgs(args.value).
+					WillReturnRows(rows)
 			},
 		},
 	}
@@ -316,12 +208,17 @@ func TestUserRepository_UpdateAvatar(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.mockBehavior(tt.args)
+			tt.mockBehavior(tt.args, tt.want)
 
-			// Update user avatar in postgres database.
-			err := repos.UpdateAvatar(context.Background(), tt.args.avatarUrl, tt.args.id)
+			// Getting a user from the database using credentials.
+			got, err := repos.GetByCreds(context.Background(), tt.args.key, tt.args.value)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("error updating user avatar: %s", err.Error())
+				t.Errorf("error getting user by credential: %s", err.Error())
+			}
+
+			// Check for similarity of user.
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Error("error user are not similar")
 			}
 		})
 	}

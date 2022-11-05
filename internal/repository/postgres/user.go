@@ -19,124 +19,85 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/durudex/durudex-user-service/internal/domain"
-	"github.com/durudex/durudex-user-service/pkg/database/postgres"
+	"github.com/durudex/go-shared/database/postgres"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v4"
 	"github.com/segmentio/ksuid"
 )
 
-// User table name.
-const UserTable string = "user"
-
 // User repository interface.
 type User interface {
-	Create(ctx context.Context, user domain.User) error
-	GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error)
-	GetByUsername(ctx context.Context, username string) (domain.User, error)
-	ForgotPassword(ctx context.Context, password, email string) error
-	UpdateAvatar(ctx context.Context, avatarUrl string, id ksuid.KSUID) error
+	// Creating a new user in the database.
+	Create(ctx context.Context, input domain.CreateUserInput) error
+
+	// Getting a user from the database by his ID.
+	Get(ctx context.Context, uid ksuid.KSUID) (domain.User, error)
+
+	// Getting a user from the database using credentials."key" argument is the name of the
+	// credential column in the database, "value" argument is the value of the credential.
+	GetByCreds(ctx context.Context, key domain.CredentialKey, value string) (domain.User, error)
 }
 
-// User repository structure.
-type UserRepository struct{ psql postgres.Postgres }
+// User postgres repository structure.
+type UserRepository struct{ psql postgres.Driver }
 
-// Creating a new user repository.
-func NewUserRepository(psql postgres.Postgres) *UserRepository {
+// Creating a new user postgres repository.
+func NewUserRepository(psql postgres.Driver) User {
 	return &UserRepository{psql: psql}
 }
 
-// Creating a new user in postgres database.
-func (r *UserRepository) Create(ctx context.Context, user domain.User) error {
-	// Query to create user.
-	query := fmt.Sprintf(`INSERT INTO "%s" (id, username, email, password) VALUES ($1, $2, $3, $4)`, UserTable)
+// Creating a new user in the database.
+func (r *UserRepository) Create(ctx context.Context, input domain.CreateUserInput) error {
+	query := `INSERT INTO users (id, username, email, password_hash, password_epoch)
+		VALUES ($1, $2, $3, $4, $5)`
 
-	// Query to create a new user.
-	if _, err := r.psql.Exec(ctx, query, user.Id, user.Username, user.Email, user.Password); err != nil {
-		var pgErr *pgconn.PgError
-
-		// Get postgres error.
-		if errors.As(err, &pgErr) {
-			// Switching postgres error code.
-			if pgErr.Code == pgerrcode.UniqueViolation {
-				// Return error if user with same username or email exists.
-				return &domain.Error{Code: domain.CodeAlreadyExists, Message: "User already exists"}
-			}
-		}
-
-		fmt.Println(err)
-		return &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
+	// Inserting a new user in database.
+	if _, err := r.psql.Exec(ctx, query, input.ID, input.Username, input.Email,
+		input.PasswordHash, input.PasswordEpoch,
+	); err != nil {
+		return postgres.ErrorHandler(err, "User")
 	}
 
 	return nil
 }
 
-// Get user by id in postgres database.
-func (r *UserRepository) GetByID(ctx context.Context, id ksuid.KSUID) (domain.User, error) {
+// Getting a user from the database by his ID.
+func (r *UserRepository) Get(ctx context.Context, uid ksuid.KSUID) (domain.User, error) {
+	query := "SELECT username, verified, avatar_url FROM users WHERE id=$1"
+
+	// Selecting public user data using ID.
+	row := r.psql.QueryRow(ctx, query, uid)
+
 	var user domain.User
 
-	// Query for get user by id.
-	query := fmt.Sprintf(`SELECT "username", "last_visit", "verified", "avatar_url"
-		FROM "%s" WHERE "id"=$1`, UserTable)
+	// Scanning the received results from the database.
+	if err := row.Scan(&user.Username, &user.Verified, &user.AvatarURL); err != nil {
+		return domain.User{}, postgres.ErrorHandler(err, "User")
+	}
 
-	row := r.psql.QueryRow(ctx, query, id)
+	return user, nil
+}
 
-	// Scanning query row.
-	err := row.Scan(&user.Username, &user.LastVisit, &user.Verified, &user.AvatarUrl)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.User{}, &domain.Error{Code: domain.CodeNotFound, Message: "User not found"}
-		}
+// Getting a user from the database using credentials."key" argument is the name of the credential column in the database,
+// "value" argument is the value of the credential.
+func (r *UserRepository) GetByCreds(ctx context.Context, key domain.CredentialKey, value string) (domain.User, error) {
+	query := fmt.Sprintf(`SELECT id, username, email, password_hash, password_epoch, verified, avatar_url
+		FROM users WHERE %s = $1`, key)
+
+	// Select all user data using credentials.
+	row := r.psql.QueryRow(ctx, query, value)
+
+	var user domain.User
+
+	// Scanning the received results from the database.
+	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.PasswordEpoch,
+		&user.Verified, &user.AvatarURL,
+	); err != nil {
 		fmt.Println(err)
-		return domain.User{}, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
+		return domain.User{}, postgres.ErrorHandler(err, "User")
 	}
 
 	return user, nil
-}
-
-// Get user by username in postgres database.
-func (r *UserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
-	var user domain.User
-
-	// Query for get user by username.
-	query := fmt.Sprintf(`SELECT "id", "email", "password", "last_visit", "verified",
-		"avatar_url" FROM "%s" WHERE username=$1`, UserTable)
-
-	row := r.psql.QueryRow(ctx, query, username)
-
-	// Scanning query row.
-	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.LastVisit,
-		&user.Verified, &user.AvatarUrl)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.User{}, &domain.Error{Code: domain.CodeNotFound, Message: "User not found"}
-		}
-
-		return domain.User{}, &domain.Error{Code: domain.CodeInternal, Message: "Internal Server Error"}
-	}
-
-	return user, nil
-}
-
-// Forgot password in postgres database.
-func (r *UserRepository) ForgotPassword(ctx context.Context, password, email string) error {
-	// Query to update user password.
-	query := fmt.Sprintf(`UPDATE "%s" SET password=$1 WHERE email=$2`, UserTable)
-	_, err := r.psql.Exec(ctx, query, password, email)
-
-	return err
-}
-
-// Update user avatar in postgres database.
-func (r *UserRepository) UpdateAvatar(ctx context.Context, avatarUrl string, id ksuid.KSUID) error {
-	// Query to update user avatar.
-	query := fmt.Sprintf(`UPDATE "%s" SET "avatar_url"=$1 WHERE "id"=$2`, UserTable)
-	_, err := r.psql.Exec(ctx, query, avatarUrl, id)
-
-	return err
 }
