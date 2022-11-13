@@ -21,13 +21,15 @@ import (
 	"os"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/durudex/durudex-user-service/internal/config"
+
+	"github.com/durudex/go-shared/crypto/tls"
+	"github.com/durudex/go-shared/transport/grpc"
 )
 
-// Test initialize config.
-func TestConfig_Init(t *testing.T) {
+// Testing creating a new config.
+func TestConfig_New(t *testing.T) {
 	// Environment configurations.
 	type env struct{ configPath, postgresURL, redisURL, jwtSigningKey string }
 
@@ -38,8 +40,6 @@ func TestConfig_Init(t *testing.T) {
 	setEnv := func(env env) {
 		os.Setenv("CONFIG_PATH", env.configPath)
 		os.Setenv("POSTGRES_URL", env.postgresURL)
-		os.Setenv("REDIS_URL", env.redisURL)
-		os.Setenv("JWT_SIGNING_KEY", env.jwtSigningKey)
 	}
 
 	// Tests structures.
@@ -58,14 +58,14 @@ func TestConfig_Init(t *testing.T) {
 				jwtSigningKey: "secret-key",
 			}},
 			want: &config.Config{
-				GRPC: config.GRPCConfig{
+				GRPC: grpc.ServerConfig{
 					Host: "user.service.durudex.local",
-					Port: "8004",
-					TLS: config.TLSConfig{
+					Port: "8000",
+					TLS: tls.PathConfig{
 						Enable: true,
-						CACert: "./certs/rootCA.pem",
-						Cert:   "./certs/sample.service.durudex.local-cert.pem",
-						Key:    "./certs/sample.service.durudex.local-key.pem",
+						CA:     "./certs/rootCA.pem",
+						Cert:   "./certs/user.service.durudex.local-cert.pem",
+						Key:    "./certs/user.service.durudex.local-key.pem",
 					},
 				},
 				Database: config.DatabaseConfig{
@@ -74,27 +74,13 @@ func TestConfig_Init(t *testing.T) {
 						MinConns: 5,
 						URL:      "postgres://localhost:1",
 					},
-					Redis: config.RedisConfig{URL: "redis://user.redis.durudex.local:6379"},
-				},
-				Password: config.PasswordConfig{Cost: 14},
-				Code: config.CodeConfig{
-					TTL:       time.Minute * 15,
-					MaxLength: 999999,
-					MinLength: 100000,
-				},
-				Auth: config.AuthConfig{
-					JWT: config.JWTConfig{
-						SigningKey: "secret-key",
-						TTL:        time.Minute * 15,
-					},
-					Session: config.SessionConfig{TTL: time.Hour * 720},
 				},
 				Service: config.ServiceConfig{
-					Email: config.Service{
-						Addr: "email.service.durudex.local:8002",
-						TLS: config.TLSConfig{
+					Code: grpc.ConnectionConfig{
+						Addr: "code.service.durudex.local:8001",
+						TLS: tls.PathConfig{
 							Enable: true,
-							CACert: "./certs/rootCA.pem",
+							CA:     "./certs/rootCA.pem",
 							Cert:   "./certs/client-cert.pem",
 							Key:    "./certs/client-key.pem",
 						},
@@ -110,10 +96,10 @@ func TestConfig_Init(t *testing.T) {
 			// Set environments configurations.
 			setEnv(tt.args.env)
 
-			// Initialize config.
-			got, err := config.Init()
+			// Creating a new config.
+			got, err := config.New()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("error initialize config: %s", err.Error())
+				t.Errorf("error creating a new config: %s", err.Error())
 			}
 
 			// Check for similarity of a config.

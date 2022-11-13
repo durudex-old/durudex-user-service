@@ -15,10 +15,10 @@
 
 grpc:
   host: "user.service.durudex.local"
-  port: 8004
+  port: 8000
   tls:
     enable: true
-    ca-cert: "./certs/rootCA.pem"
+    ca: "./certs/rootCA.pem"
     cert: "./certs/user.service.durudex.local-cert.pem"
     key: "./certs/user.service.durudex.local-key.pem"
 
@@ -27,25 +27,11 @@ database:
     max-conns: 20
     min-conns: 5
 
-password:
-  cost: 14
-
-code:
-  ttl: "15m"
-  max-length: 999999
-  min-length: 100000
-
-auth:
-  jwt:
-    ttl: "15m"
-  session:
-    ttl: "720h"
-
 service:
-  email:
-    addr: "email.service.durudex.local:8002"
+  code:
+    addr: "code.service.durudex.local:8001"
     tls:
-      enable: true
-      ca-cert: "./certs/rootCA.pem"
+      enable: false
+      ca: "./certs/rootCA.pem"
       cert: "./certs/client-cert.pem"
       key: "./certs/client-key.pem"

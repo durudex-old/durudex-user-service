@@ -20,7 +20,8 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"time"
+
+	"github.com/durudex/go-shared/transport/grpc"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -30,91 +31,47 @@ import (
 const defaultConfigPath string = "configs/main"
 
 type (
-	// Config variables.
+	// Config stores all configuration structures.
 	Config struct {
-		GRPC     GRPCConfig
-		Database DatabaseConfig
-		Password PasswordConfig
-		Code     CodeConfig
-		Auth     AuthConfig
-		Service  ServiceConfig
-	}
+		// GRPC server config variables.
+		GRPC grpc.ServerConfig `mapstructure:"grpc"`
 
-	// gRPC server config variables.
-	GRPCConfig struct {
-		Host string    `mapstructure:"host"`
-		Port string    `mapstructure:"port"`
-		TLS  TLSConfig `mapstructure:"tls"`
-	}
+		// Database config variables.
+		Database DatabaseConfig `mapstructure:"database"`
 
-	// TLS config variables.
-	TLSConfig struct {
-		Enable bool   `mapstructure:"enable"`
-		CACert string `mapstructure:"ca-cert"`
-		Cert   string `mapstructure:"cert"`
-		Key    string `mapstructure:"key"`
-	}
-
-	// Password config variables.
-	PasswordConfig struct {
-		Cost int `mapstructure:"cost"`
-	}
-
-	// Code config variables.
-	CodeConfig struct {
-		TTL       time.Duration `mapstructure:"ttl"`
-		MaxLength int64         `mapstructure:"max-length"`
-		MinLength int64         `mapstructure:"min-length"`
-	}
-
-	// Auth config variables.
-	AuthConfig struct {
-		JWT     JWTConfig     `mapstructure:"jwt"`
-		Session SessionConfig `mapstructure:"session"`
-	}
-
-	// JWT config variables.
-	JWTConfig struct {
-		SigningKey string
-		TTL        time.Duration `mapstructure:"ttl"`
-	}
-
-	// User session config variables.
-	SessionConfig struct {
-		TTL time.Duration `mapstructure:"ttl"`
+		// Service config variables.
+		Service ServiceConfig `mapstructure:"service"`
 	}
 
 	// Database config variables.
 	DatabaseConfig struct {
+		// Postgres database config variables.
 		Postgres PostgresConfig `mapstructure:"postgres"`
-		Redis    RedisConfig
 	}
 
 	// Postgres config variables.
 	PostgresConfig struct {
+		// MaxConns stores the maximum number of database connections.
 		MaxConns int32 `mapstructure:"max-conns"`
+
+		// MinConns stores the minimum number of database connections.
 		MinConns int32 `mapstructure:"min-conns"`
-		URL      string
-	}
 
-	// Redis config variables.
-	RedisConfig struct{ URL string }
-
-	// Service base config.
-	Service struct {
-		Addr string    `mapstructure:"addr"`
-		TLS  TLSConfig `mapstructure:"tls"`
+		// URL is used to establish a connection to the database, and it may also contain some
+		// connection configuration.
+		URL string
 	}
 
 	// Service config variables.
 	ServiceConfig struct {
-		Email Service `mapstructure:"email"`
+		// Code service gRPC client.
+		Code grpc.ConnectionConfig `mapstructure:"code"`
 	}
 )
 
-// Initialize config.
-func Init() (*Config, error) {
-	log.Debug().Msg("Initialize config...")
+// New returns a new config.
+func New() (*Config, error) {
+	log.Debug().Msg("Creating a new config...")
 
 	// Parsing specified when starting the config file.
 	if err := parseConfigFile(); err != nil {
@@ -124,11 +81,11 @@ func Init() (*Config, error) {
 	var cfg Config
 
 	// Unmarshal config keys.
-	if err := unmarshal(&cfg); err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	// Set configurations from environment.
+	// Sets configurations from environment.
 	setFromEnv(&cfg)
 
 	return &cfg, nil
@@ -156,44 +113,10 @@ func parseConfigFile() error {
 	return viper.ReadInConfig()
 }
 
-// Unmarshal config keys.
-func unmarshal(cfg *Config) error {
-	log.Debug().Msg("Unmarshal config keys...")
-
-	// Unmarshal password keys.
-	if err := viper.UnmarshalKey("password", &cfg.Password); err != nil {
-		return err
-	}
-	// Unmarshal code keys.
-	if err := viper.UnmarshalKey("code", &cfg.Code); err != nil {
-		return err
-	}
-	// Unmarshal auth keys.
-	if err := viper.UnmarshalKey("auth", &cfg.Auth); err != nil {
-		return err
-	}
-	// Unmarshal postgres database keys.
-	if err := viper.UnmarshalKey("database", &cfg.Database); err != nil {
-		return err
-	}
-	// Unmarshal service keys.
-	if err := viper.UnmarshalKey("service", &cfg.Service); err != nil {
-		return err
-	}
-	// Unmarshal server keys.
-	return viper.UnmarshalKey("grpc", &cfg.GRPC)
-}
-
-// Set configurations from environment.
+// Sets configurations from environment.
 func setFromEnv(cfg *Config) {
 	log.Debug().Msg("Set configurations from environment.")
 
 	// Postgres database configurations.
 	cfg.Database.Postgres.URL = os.Getenv("POSTGRES_URL")
-
-	// Redis database configurations.
-	cfg.Database.Redis.URL = os.Getenv("REDIS_URL")
-
-	// Auth variables.
-	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }
